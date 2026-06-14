@@ -11,12 +11,15 @@ Usage:
 """
 
 import argparse
+import threading
 import time
 
 import mujoco
 import numpy as np
 import viser
 import viser.transforms as vtf
+
+_LOCK = threading.Lock()  # mjData is not thread-safe; serialize slider callbacks
 
 
 def mesh_geoms(model):
@@ -87,9 +90,10 @@ def main():
             )
 
             def _cb(_, qadr=qadr, s=s):
-                data.qpos[qadr] = s.value
-                mujoco.mj_forward(model, data)
-                refresh_poses()
+                with _LOCK:
+                    data.qpos[qadr] = s.value
+                    mujoco.mj_forward(model, data)
+                    refresh_poses()
 
             s.on_update(_cb)
             sliders.append((qadr, s, init))
