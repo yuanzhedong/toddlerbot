@@ -60,6 +60,19 @@ Always export the legs with the `_2` display configs (or the internal
   hip_yaw) and `XM430` (knee/ankle).
 - **Physics**: loads + 500 steps, no NaN; home keyframe base height 0.310 m.
 
+## Left-arm fix (post-export, no CAD change)
+The shared arm doc's `left_arm` config (used for the left arm) carries a spurious
+~90° `shoulder_roll` at joint-zero, so the left arm exported sticking straight out
+instead of mirroring the (correct) right arm. Since the arm CAD is the original
+author's shared document, this was fixed **at the model level** rather than in CAD:
+`scripts/mirror_left_arm.py` rebuilds the left arm as a Y-mirror of the right arm
+(mirrored body/geom/inertial poses + joint axes, and Y-mirrored mesh copies
+`assets/lmir_*.stl`). The home keyframe's arm joints are set to 0 (the arms hang
+vertically at joint-zero after the fix). Verified: zero-pose and home are Y-mirror
+symmetric, articulation mirrors correctly, mass unchanged (3.4522 kg). The reference
+for "correct symmetric arm" is `real-stanford/minimalist_compliance_control`'s
+toddlerbot (same author), whose arm hangs symmetric at zero.
+
 ## Caveats (inherited from 2.0 `default.yml`, not from CAD)
 - **`XM430` W210 vs W350**: not derivable from CAD (same physical motor, differs
   only in internal gear ratio); `default.yml` uses W210 for knee/ankle. Confirm
