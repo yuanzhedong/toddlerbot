@@ -116,7 +116,7 @@
                 <geom type="mesh" class="visual" pos="0.00863829 0.01751699 -0.0529559" quat="-1.0 0.0 0.0 0.0" mesh="left_knee_link_visual" material="knee_link_visual_material" />
                 <geom type="box" class="collision" pos="0.00422789 0.01852363 -0.05115262" quat="-1.0 0.0 0.0 0.0" size="0.0197419 0.02576116 0.0661526" name="left_knee_link_collision" material="knee_link_visual_material" />
                 <body name="left_ankle_pitch_link" pos="-0.0 0.0 -0.11" quat="1 0 0 0">
-                  <joint axis="0.22 0.97 -0.0" name="left_ankle_pitch" type="hinge" range="0.0 2.879793265790644" class="XM430-W210" />
+                  <joint axis="0.22 0.97 -0.0" name="left_ankle_pitch" type="hinge" range="-1.833 0.96" class="XM430-W210" />
                   <inertial pos="0.00563129 0.01800576 0.02161601" mass="0.172721" fullinertia="4.63386e-05 0.000105326 0.000120275 -1.3234e-06 -5.7151e-07 -5.00904e-08" />
                   <geom type="mesh" class="visual" pos="0.00563129 0.01800576 0.02161601" quat="-1.0 -6.3e-07 -5.5e-07 1.1e-07" mesh="left_ankle_pitch_link_visual" material="ankle_pitch_link_visual_material" />
                   <geom type="box" class="collision" pos="0.00344915 0.0174622 0.02245323" quat="-1.0 -6.3e-07 -5.5e-07 1.1e-07" size="0.04020603 0.02357272 0.04626727" name="left_ankle_pitch_link_collision" material="ankle_pitch_link_visual_material" />
@@ -124,7 +124,7 @@
                     <joint axis="0.49 -0.11 -0.87" name="left_ankle_roll" type="hinge" range="-1.8836058968575107 0.5598550559345505" class="XC430" />
                     <inertial pos="-0.00565452 -0.00211769 -0.04429887" mass="0.039" fullinertia="2.88034e-05 3.04307e-05 8.87438e-06 6.52846e-11 2.12102e-06 2.65224e-10" />
                     <geom type="mesh" class="visual" pos="-0.00565452 -0.00211769 -0.04429887" quat="1.0 5.1e-07 1.3e-07 -6.2e-07" mesh="left_ankle_roll_link_visual" material="ankle_roll_link_visual_material" />
-                    <geom type="box" class="collision" pos="-0.00868264 -0.00209952 -0.0932" quat="1.0 5.1e-07 1.3e-07 -6.2e-07" size="0.055 0.021 0.007" name="left_ankle_roll_link_collision" material="ankle_roll_link_visual_material" />
+                    <geom type="box" class="collision" pos="0.00498312 -0.00331014 -0.0887919" quat="0.954005 0.0712098 0.291001 -0.0110413" size="0.0143301 0.0209602 0.005" name="left_ankle_roll_link_collision" material="ankle_roll_link_visual_material" />
                     <site name="left_foot_center" pos="-0.01300979 -0.00174957 -0.05213141" type="sphere" size="0.005" rgba="0.9 0.1 0.1 0.8" />
                   </body>
                 </body>
@@ -157,7 +157,7 @@
                 <geom type="mesh" class="visual" pos="0.00863829 -0.01751699 -0.0529559" quat="-1.0 -0.0 0.0 -0.0" mesh="rightmir_left_knee_link_visual" material="knee_link_visual_material" />
                 <geom type="box" class="collision" pos="0.00422789 -0.01852363 -0.05115262" quat="-1.0 -0.0 0.0 -0.0" size="0.0197419 0.02576116 0.0661526" name="right_knee_link_collision" material="knee_link_visual_material" />
                 <body name="right_ankle_pitch_link" pos="-0.0 -0.0 -0.11" quat="1.0 -0.0 0.0 -0.0">
-                  <joint axis="-0.22 0.97 0.0" name="right_ankle_pitch" type="hinge" range="0.0 2.879793265790644" class="XM430-W210" />
+                  <joint axis="-0.22 0.97 0.0" name="right_ankle_pitch" type="hinge" range="-1.833 0.96" class="XM430-W210" />
                   <inertial pos="0.00563129 -0.01800576 0.02161601" mass="0.172721" fullinertia="4.63386e-05 0.000105326 0.000120275 1.3234e-06 -5.7151e-07 5.00904e-08" />
                   <geom type="mesh" class="visual" pos="0.00563129 -0.01800576 0.02161601" quat="-1.0 6.3e-07 -5.5e-07 -1.1e-07" mesh="rightmir_left_ankle_pitch_link_visual" material="ankle_pitch_link_visual_material" />
                   <geom type="box" class="collision" pos="0.00344915 -0.0174622 0.02245323" quat="-1.0 6.3e-07 -5.5e-07 -1.1e-07" size="0.04020603 0.02357272 0.04626727" name="right_ankle_pitch_link_collision" material="ankle_pitch_link_visual_material" />
@@ -165,7 +165,7 @@
                     <joint axis="-0.49 -0.11 0.87" name="right_ankle_roll" type="hinge" range="-1.8836058968575107 0.5598550559345505" class="XC430" />
                     <inertial pos="-0.00565452 0.00211769 -0.04429887" mass="0.039" fullinertia="2.88034e-05 3.04307e-05 8.87438e-06 -6.52846e-11 2.12102e-06 -2.65224e-10" />
                     <geom type="mesh" class="visual" pos="-0.00565452 0.00211769 -0.04429887" quat="1.0 -5.1e-07 1.3e-07 6.2e-07" mesh="rightmir_left_ankle_roll_link_visual" material="ankle_roll_link_visual_material" />
-                    <geom type="box" class="collision" pos="-0.00868264 0.00209952 -0.0932" quat="1.0 -5.1e-07 1.3e-07 6.2e-07" size="0.055 0.021 0.007" name="right_ankle_roll_link_collision" material="ankle_roll_link_visual_material" />
+                    <geom type="box" class="collision" pos="0.00498312 0.00331014 -0.0887919" quat="0.954005 -0.0712098 0.291001 0.0110413" size="0.0143301 0.0209602 0.005" name="right_ankle_roll_link_collision" material="ankle_roll_link_visual_material" />
                     <site name="right_foot_center" pos="-0.01300979 0.00174957 -0.05213141" type="sphere" size="0.005" rgba="0.9 0.1 0.1 0.8" />
                   </body>
                 </body>
