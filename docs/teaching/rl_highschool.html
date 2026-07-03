@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Teaching RL with ToddlerBot — High School Curriculum</title>
+<style>
+  :root {
+    --ink: #1f2430;
+    --muted: #5b6472;
+    --accent: #2f6fed;
+    --accent-soft: #eaf1ff;
+    --line: #e2e6ee;
+    --bg: #ffffff;
+    --card: #f7f9fc;
+    --warn-bg: #fff7e6;
+    --warn-line: #f0c36d;
+    --good-bg: #eefaf0;
+    --good-line: #8fd6a0;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: var(--ink);
+    background: var(--bg);
+    line-height: 1.6;
+  }
+  .wrap { max-width: 900px; margin: 0 auto; padding: 40px 24px 80px; }
+  header.hero {
+    background: linear-gradient(135deg, #2f6fed 0%, #6a4cf0 100%);
+    color: #fff;
+    padding: 48px 24px;
+    text-align: center;
+  }
+  header.hero h1 { margin: 0 0 8px; font-size: 2rem; }
+  header.hero p { margin: 0; opacity: .92; font-size: 1.05rem; }
+  .badges { margin-top: 18px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+  .badge {
+    background: rgba(255,255,255,.18); border: 1px solid rgba(255,255,255,.35);
+    border-radius: 999px; padding: 5px 14px; font-size: .85rem;
+  }
+  h2 {
+    margin: 44px 0 14px; font-size: 1.5rem; padding-bottom: 8px;
+    border-bottom: 2px solid var(--line);
+  }
+  h3 { margin: 26px 0 8px; font-size: 1.15rem; color: var(--accent); }
+  p { margin: 10px 0; }
+  a { color: var(--accent); }
+  code {
+    background: #eef1f6; border-radius: 5px; padding: 2px 6px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .9em;
+  }
+  pre {
+    background: #1f2430; color: #e6e9f0; padding: 14px 16px; border-radius: 10px;
+    overflow-x: auto; font-size: .88rem; line-height: 1.5;
+  }
+  pre code { background: none; color: inherit; padding: 0; }
+  table { border-collapse: collapse; width: 100%; margin: 16px 0; font-size: .95rem; }
+  th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { background: var(--accent-soft); color: var(--ink); }
+  tr:last-child td { border-bottom: none; }
+  .callout {
+    border-radius: 10px; padding: 14px 18px; margin: 18px 0; border: 1px solid var(--line);
+    background: var(--card);
+  }
+  .callout.warn { background: var(--warn-bg); border-color: var(--warn-line); }
+  .callout.good { background: var(--good-bg); border-color: var(--good-line); }
+  .callout strong { display: inline-block; }
+  .session {
+    border: 1px solid var(--line); border-radius: 14px; padding: 6px 24px 20px;
+    margin: 22px 0; background: var(--bg);
+  }
+  .hour {
+    border-left: 3px solid var(--accent); padding: 4px 0 4px 16px; margin: 18px 0;
+  }
+  .hour .label {
+    font-size: .78rem; text-transform: uppercase; letter-spacing: .05em;
+    color: var(--accent); font-weight: 700;
+  }
+  .hour h4 { margin: 2px 0 8px; font-size: 1.05rem; }
+  ul { margin: 8px 0; padding-left: 22px; }
+  li { margin: 5px 0; }
+  .rec {
+    display: inline-block; background: var(--good-bg); border: 1px solid var(--good-line);
+    color: #1c7a35; border-radius: 999px; padding: 2px 12px; font-size: .82rem; font-weight: 700;
+  }
+  footer { color: var(--muted); font-size: .88rem; margin-top: 50px; border-top: 1px solid var(--line); padding-top: 18px; }
+  figure { margin: 22px 0; text-align: center; }
+  figure svg, figure img, figure video { max-width: 100%; height: auto; border-radius: 10px; }
+  figure.diagram { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 14px; }
+  figcaption { color: var(--muted); font-size: .86rem; margin-top: 8px; line-height: 1.4; }
+  .media-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin: 18px 0; }
+  .media-grid figure { margin: 0; }
+  .media-grid img { border: 1px solid var(--line); }
+  .teach-note { display: inline-block; background: var(--accent-soft); color: #1c3f8f; border-radius: 6px; padding: 1px 8px; font-size: .8rem; font-weight: 600; }
+  @media (max-width: 640px) { .media-grid { grid-template-columns: 1fr; } }
+  @media print {
+    header.hero { background: #2f6fed !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    th, .callout, .rec { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .session { break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <h1>Teaching Reinforcement Learning with ToddlerBot</h1>
+  <p>A high-school curriculum built on a real open-source humanoid robot</p>
+  <div class="badges">
+    <span class="badge">Audience: intro-CS Python</span>
+    <span class="badge">Compute: 2&times; RTX 3080 (groups) + RTX 6000 Blackwell (instructor)</span>
+    <span class="badge">Three 3-hour sessions (3rd needs robots)</span>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <figure>
+    <img src="../_static/banner.png" alt="ToddlerBot humanoid robot">
+    <figcaption>ToddlerBot — the open-source humanoid this class is built around.</figcaption>
+  </figure>
+
+  <figure>
+    <img src="../_static/walk_faster.gif" alt="ToddlerBot walking after RL training">
+    <figcaption><strong>This is the goal.</strong> A walking gait that <em>nobody programmed</em> — it emerged from reinforcement learning. Open with this clip: "How do you think we taught it to do that? We didn't. It figured it out."</figcaption>
+  </figure>
+
+  <div class="callout good">
+    <strong>Recommendation: two 3-hour sessions.</strong>
+    With a dedicated GPU per group and intro-CS Python, students can actually <em>train something themselves</em> —
+    but that payoff only lands if they build RL intuition first (Session&nbsp;1) and then run and iterate on
+    training (Session&nbsp;2). A single session forces you to cut either the concepts or the hands-on training,
+    and the big "aha" here is watching a reward curve climb while a robot learns to walk.
+  </div>
+
+  <div class="callout warn">
+    <strong>Reality check that shapes everything:</strong>
+    the repo's default walk training is <strong>1&nbsp;billion timesteps &times; 4096 envs</strong>
+    (<code>walk.gin</code>, <code>ppo_config.py</code>) — that's hours even on a strong GPU, too long to converge live.
+    So the design splits the work across your two GPU tiers: <strong>groups iterate fast on the RTX&nbsp;3080s</strong>
+    with a <strong>scaled-down config</strong> (reward curve visibly climbs in ~10–15&nbsp;min), while the
+    <strong>RTX&nbsp;6000 Blackwells</strong> produce the pre-trained "gold" checkpoints and run any fuller/longer
+    experiments on demand. Don't try to converge the full run live on a 3080.
+  </div>
+
+  <h2>What students will be able to do by the end</h2>
+  <ul>
+    <li>Explain the <strong>reinforcement-learning loop</strong> (agent, environment, state, action, reward) in their own words and point to each piece in a real robot.</li>
+    <li>Describe what a <strong>neural network</strong> is and how the robot's "brain" turns sensor numbers into motor commands.</li>
+    <li>Read a <strong>reward function</strong>, predict the behavior it will produce, and change it to change the robot.</li>
+    <li>Launch a real <strong>training run</strong>, read a reward curve, and compare experiments.</li>
+    <li>Explain the <strong>sim-to-real gap</strong> and why <strong>domain randomization</strong> helps a sim-trained policy work on hardware.</li>
+    <li>Recognize <strong>reward hacking</strong> — how an agent optimizes what you literally said, not what you meant.</li>
+  </ul>
+
+  <h2>Where this fits: AI &rarr; ML &rarr; DL &rarr; RL &rarr; Robot learning</h2>
+  <p>Students often blur these words together. Untangle them once, early, and refer back to this ladder all class. Each row is a special case of the one above it.</p>
+  <table>
+    <thead><tr><th>Term</th><th>One-line meaning</th><th>Everyday example</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Artificial Intelligence (AI)</strong></td><td>Machines doing things that usually need human intelligence.</td><td>A chess program, a chatbot</td></tr>
+      <tr><td><strong>Machine Learning (ML)</strong></td><td>AI that <em>learns patterns from data</em> instead of following hand-written rules.</td><td>Spam filter, movie recommendations</td></tr>
+      <tr><td><strong>Deep Learning (DL)</strong></td><td>ML using <em>neural networks with many layers</em>.</td><td>Face unlock, voice assistants</td></tr>
+      <tr><td><strong>Reinforcement Learning (RL)</strong></td><td>Learning by <em>trial and error from rewards</em>, not from labeled answers.</td><td>Game-playing AI, a dog learning tricks</td></tr>
+      <tr><td><strong>Deep RL</strong></td><td>RL where the decision-maker is a <em>deep neural network</em>.</td><td><strong>ToddlerBot learning to walk</strong></td></tr>
+      <tr><td><strong>Robot learning</strong></td><td>Deep RL applied to a <em>physical body</em> — adds the sim-to-real challenge.</td><td>This class</td></tr>
+    </tbody>
+  </table>
+  <div class="callout">
+    <strong>The one-sentence version:</strong> ToddlerBot uses <em>deep reinforcement learning</em> — a neural
+    network (deep learning) that learns to walk by trial and error (RL), trained in a physics simulator and then
+    moved onto a real robot (robotics + sim-to-real).
+  </div>
+
+  <h2>The RL loop, mapped to this exact repo</h2>
+  <p>This is your anchor diagram for the whole class. Everything abstract points back here.</p>
+  <table>
+    <thead><tr><th>RL concept</th><th>In ToddlerBot</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Agent / policy</strong></td><td>Small neural net (PPO) that outputs 12 leg-motor targets</td></tr>
+      <tr><td><strong>Environment</strong></td><td><code>MJXEnv</code> — MuJoCo humanoid physics</td></tr>
+      <tr><td><strong>Observation (state)</strong></td><td>84 numbers: motor positions/velocities, torso orientation, angular velocity, walk command, gait phase</td></tr>
+      <tr><td><strong>Action</strong></td><td>12 leg joint targets</td></tr>
+      <tr><td><strong>Reward</strong></td><td>Sum of readable terms in <code>walk_env.py</code>: <code>_reward_feet_air_time</code>, <code>_reward_torso_roll</code>, <code>_reward_feet_slip</code>, velocity tracking, energy penalties…</td></tr>
+      <tr><td><strong>Episode / done</strong></td><td>Up to 1000 steps; ends early if it falls (<code>healthy_z_range</code>)</td></tr>
+      <tr><td><strong>Algorithm</strong></td><td>PPO — trial-and-error with 4096 robots in parallel</td></tr>
+    </tbody>
+  </table>
+
+  <figure class="diagram">
+    <svg viewBox="0 0 760 220" role="img" aria-label="The reinforcement learning loop"><defs><marker id="ah" markerWidth="12" markerHeight="12" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#2f6fed"/></marker><marker id="ahg" markerWidth="12" markerHeight="12" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#2f9e57"/></marker></defs><rect x="40" y="55" width="230" height="110" rx="14" fill="#eaf1ff" stroke="#2f6fed" stroke-width="2.5"/><text x="155" y="95" text-anchor="middle" font-size="22" font-weight="700" fill="#1f2430">AGENT</text><text x="155" y="120" text-anchor="middle" font-size="14" fill="#5b6472">the policy</text><text x="155" y="140" text-anchor="middle" font-size="14" fill="#5b6472">(neural network)</text><rect x="490" y="55" width="230" height="110" rx="14" fill="#eefaf0" stroke="#2f9e57" stroke-width="2.5"/><text x="605" y="95" text-anchor="middle" font-size="22" font-weight="700" fill="#1f2430">ENVIRONMENT</text><text x="605" y="120" text-anchor="middle" font-size="14" fill="#5b6472">MuJoCo</text><text x="605" y="140" text-anchor="middle" font-size="14" fill="#5b6472">physics simulator</text><line x1="270" y1="88" x2="486" y2="88" stroke="#2f6fed" stroke-width="3" marker-end="url(#ah)"/><text x="378" y="78" text-anchor="middle" font-size="14" font-weight="700" fill="#2f6fed">ACTION</text><text x="378" y="106" text-anchor="middle" font-size="12.5" fill="#5b6472">12 motor targets</text><line x1="490" y1="140" x2="274" y2="140" stroke="#2f6fed" stroke-width="3" marker-end="url(#ah)"/><text x="382" y="158" text-anchor="middle" font-size="14" font-weight="700" fill="#2f6fed">OBSERVATION (84)  +  REWARD</text></svg>
+    <figcaption>The RL loop in one picture. The agent picks an <strong>action</strong>; the environment returns a new <strong>observation</strong> and a <strong>reward</strong>; repeat ~50&times; per second.</figcaption>
+  </figure>
+  <p>The teaching gold: <strong>reward terms are named and human-readable</strong> — perfect for a reward-shaping activity.</p>
+
+  <h2>The robot's brain: a deep neural network</h2>
+  <p>The "policy" in the table above is a <strong>neural network</strong>. This is the deep-learning core of the class — worth 20–30 minutes on its own. Keep it concrete: in this repo the brain is literally a function that turns <strong>84 numbers into 12 numbers</strong>.</p>
+
+  <figure class="diagram">
+    <svg viewBox="0 0 780 360" role="img" aria-label="The policy neural network: 84 inputs to 12 outputs"><defs><marker id="ah" markerWidth="12" markerHeight="12" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#2f6fed"/></marker><marker id="ahg" markerWidth="12" markerHeight="12" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#2f9e57"/></marker></defs><line x1="95" y1="77" x2="255" y2="55" stroke="#9bb4e8" stroke-width="1" opacity="0.35"/><line x1="95" y1="77" x2="255" y2="99" stroke="#9bb4e8" stroke-width="1" opacity="0.35"/><line x1="95" y1="77" x2="255" y2="143" stroke="#9bb4e8" stroke-width="1" opacity="0.35"/><line x1="95" y1="77" x2="255" y2="187" stroke="#9bb4e8" stroke-width="1" opacity="0.35"/><line x1="95" y1="77" x2="255" y2="231" stroke="#9bb4e8" stroke-width="1" opacity="0.35"/><line x1="95" y1="77" x2="255" y2="275" stroke="#9bb4e8" stroke-width="1" opacity="0.35"/><line x1="95" y1="121" x2="255" y2="55" stroke="#9bb4e8" stroke-width="1" opacity="0.35"/><line x1="95" y1="121" x2="255" y2="99" stroke="#9bb4e8" stroke-width="1" opacity="0.35"/><line x1="95" y1="121" x2="255" y2="143" stroke="#9bb4e8" stroke-width="1" opacity="0.35"/><line x1="95" y1="121" x2="255" y2="187" stroke="#9bb4e8" stroke-width="1" opacity="0.35"/><line x1="95" y1="121" x2="255" y2="231" stroke="#9bb4e8" stroke-width="1" opacity="0.35"/><line x1="95" y1="121" x2="255" y2="275" stroke="#9bb4e8" stroke-width="1" opacity="0.35"/><line x1="95" y1="165" x2="255" y2="55" stroke="#9bb4e8" stroke-width="1" opacity="0.35"/><line x1="95" y1="165" x2="255" y2="99" stroke="#9bb4e8" stroke-width="1" opacity="0.35"/><line x1="95" y1="165" x2="255" y2="143" stroke="#9bb4e8" stroke-width="1" opacity="0.35"/><line x1="95" y1="165" x2="255" y2="187" stroke="#9bb4e8" stroke-width="1" opacity="0.35"/><line x1="95" y1="165" x2="255" y2="231" stroke="#9bb4e8" stroke-width="1" opacity="0.35"/><line x1="95" y1="165" x2="255" y2="275" stroke="#9bb4e8" stroke-width="1" opacity="0.35"/><line x1="95" y1="209" x2="255" y2="55" stroke="#9bb4e8" stroke-width="1" opacity="0.35"/><line x1="95" y1="209" x2="255" y2="99" stroke="#9bb4e8" stroke-width="1" opacity="0.35"/><line x1="95" y1="209" x2="255" y2="143" stroke="#9bb4e8" stroke-width="1" opacity="0.35"/><line x1="95" y1="209" x2="255" y2="187" stroke="#9bb4e8" stroke-width="1" opacity="0.35"/><line x1="95" y1="209" x2="255" y2="231" stroke="#9bb4e8" stroke-width="1" opacity="0.35"/><line x1="95" y1="209" x2="255" y2="275" stroke="#9bb4e8" stroke-width="1" opacity="0.35"/><line x1="95" y1="253" x2="255" y2="55" stroke="#9bb4e8" stroke-width="1" opacity="0.35"/><line x1="95" y1="253" x2="255" y2="99" stroke="#9bb4e8" stroke-width="1" opacity="0.35"/><line x1="95" y1="253" x2="255" y2="143" stroke="#9bb4e8" stroke-width="1" opacity="0.35"/><line x1="95" y1="253" x2="255" y2="187" stroke="#9bb4e8" stroke-width="1" opacity="0.35"/><line x1="95" y1="253" x2="255" y2="231" stroke="#9bb4e8" stroke-width="1" opacity="0.35"/><line x1="95" y1="253" x2="255" y2="275" stroke="#9bb4e8" stroke-width="1" opacity="0.35"/><line x1="255" y1="55" x2="405" y2="77" stroke="#9bb4e8" stroke-width="1" opacity="0.35"/><line x1="255" y1="55" x2="405" y2="121" stroke="#9bb4e8" stroke-width="1" opacity="0.35"/><line x1="255" y1="55" x2="405" y2="165" stroke="#9bb4e8" stroke-width="1" opacity="0.35"/><line x1="255" y1="55" x2="405" y2="209" stroke="#9bb4e8" stroke-width="1" opacity="0.35"/><line x1="255" y1="55" x2="405" y2="253" stroke="#9bb4e8" stroke-width="1" opacity="0.35"/><line x1="255" y1="99" x2="405" y2="77" stroke="#9bb4e8" stroke-width="1" opacity="0.35"/><line x1="255" y1="99" x2="405" y2="121" stroke="#9bb4e8" stroke-width="1" opacity="0.35"/><line x1="255" y1="99" x2="405" y2="165" stroke="#9bb4e8" stroke-width="1" opacity="0.35"/><line x1="255" y1="99" x2="405" y2="209" stroke="#9bb4e8" stroke-width="1" opacity="0.35"/><line x1="255" y1="99" x2="405" y2="253" stroke="#9bb4e8" stroke-width="1" opacity="0.35"/><line x1="255" y1="143" x2="405" y2="77" stroke="#9bb4e8" stroke-width="1" opacity="0.35"/><line x1="255" y1="143" x2="405" y2="121" stroke="#9bb4e8" stroke-width="1" opacity="0.35"/><line x1="255" y1="143" x2="405" y2="165" stroke="#9bb4e8" stroke-width="1" opacity="0.35"/><line x1="255" y1="143" x2="405" y2="209" stroke="#9bb4e8" stroke-width="1" opacity="0.35"/><line x1="255" y1="143" x2="405" y2="253" stroke="#9bb4e8" stroke-width="1" opacity="0.35"/><line x1="255" y1="187" x2="405" y2="77" stroke="#9bb4e8" stroke-width="1" opacity="0.35"/><line x1="255" y1="187" x2="405" y2="121" stroke="#9bb4e8" stroke-width="1" opacity="0.35"/><line x1="255" y1="187" x2="405" y2="165" stroke="#9bb4e8" stroke-width="1" opacity="0.35"/><line x1="255" y1="187" x2="405" y2="209" stroke="#9bb4e8" stroke-width="1" opacity="0.35"/><line x1="255" y1="187" x2="405" y2="253" stroke="#9bb4e8" stroke-width="1" opacity="0.35"/><line x1="255" y1="231" x2="405" y2="77" stroke="#9bb4e8" stroke-width="1" opacity="0.35"/><line x1="255" y1="231" x2="405" y2="121" stroke="#9bb4e8" stroke-width="1" opacity="0.35"/><line x1="255" y1="231" x2="405" y2="165" stroke="#9bb4e8" stroke-width="1" opacity="0.35"/><line x1="255" y1="231" x2="405" y2="209" stroke="#9bb4e8" stroke-width="1" opacity="0.35"/><line x1="255" y1="231" x2="405" y2="253" stroke="#9bb4e8" stroke-width="1" opacity="0.35"/><line x1="255" y1="275" x2="405" y2="77" stroke="#9bb4e8" stroke-width="1" opacity="0.35"/><line x1="255" y1="275" x2="405" y2="121" stroke="#9bb4e8" stroke-width="1" opacity="0.35"/><line x1="255" y1="275" x2="405" y2="165" stroke="#9bb4e8" stroke-width="1" opacity="0.35"/><line x1="255" y1="275" x2="405" y2="209" stroke="#9bb4e8" stroke-width="1" opacity="0.35"/><line x1="255" y1="275" x2="405" y2="253" stroke="#9bb4e8" stroke-width="1" opacity="0.35"/><line x1="405" y1="77" x2="555" y2="99" stroke="#9bb4e8" stroke-width="1" opacity="0.35"/><line x1="405" y1="77" x2="555" y2="143" stroke="#9bb4e8" stroke-width="1" opacity="0.35"/><line x1="405" y1="77" x2="555" y2="187" stroke="#9bb4e8" stroke-width="1" opacity="0.35"/><line x1="405" y1="77" x2="555" y2="231" stroke="#9bb4e8" stroke-width="1" opacity="0.35"/><line x1="405" y1="121" x2="555" y2="99" stroke="#9bb4e8" stroke-width="1" opacity="0.35"/><line x1="405" y1="121" x2="555" y2="143" stroke="#9bb4e8" stroke-width="1" opacity="0.35"/><line x1="405" y1="121" x2="555" y2="187" stroke="#9bb4e8" stroke-width="1" opacity="0.35"/><line x1="405" y1="121" x2="555" y2="231" stroke="#9bb4e8" stroke-width="1" opacity="0.35"/><line x1="405" y1="165" x2="555" y2="99" stroke="#9bb4e8" stroke-width="1" opacity="0.35"/><line x1="405" y1="165" x2="555" y2="143" stroke="#9bb4e8" stroke-width="1" opacity="0.35"/><line x1="405" y1="165" x2="555" y2="187" stroke="#9bb4e8" stroke-width="1" opacity="0.35"/><line x1="405" y1="165" x2="555" y2="231" stroke="#9bb4e8" stroke-width="1" opacity="0.35"/><line x1="405" y1="209" x2="555" y2="99" stroke="#9bb4e8" stroke-width="1" opacity="0.35"/><line x1="405" y1="209" x2="555" y2="143" stroke="#9bb4e8" stroke-width="1" opacity="0.35"/><line x1="405" y1="209" x2="555" y2="187" stroke="#9bb4e8" stroke-width="1" opacity="0.35"/><line x1="405" y1="209" x2="555" y2="231" stroke="#9bb4e8" stroke-width="1" opacity="0.35"/><line x1="405" y1="253" x2="555" y2="99" stroke="#9bb4e8" stroke-width="1" opacity="0.35"/><line x1="405" y1="253" x2="555" y2="143" stroke="#9bb4e8" stroke-width="1" opacity="0.35"/><line x1="405" y1="253" x2="555" y2="187" stroke="#9bb4e8" stroke-width="1" opacity="0.35"/><line x1="405" y1="253" x2="555" y2="231" stroke="#9bb4e8" stroke-width="1" opacity="0.35"/><line x1="555" y1="99" x2="695" y2="77" stroke="#9bb4e8" stroke-width="1" opacity="0.35"/><line x1="555" y1="99" x2="695" y2="121" stroke="#9bb4e8" stroke-width="1" opacity="0.35"/><line x1="555" y1="99" x2="695" y2="165" stroke="#9bb4e8" stroke-width="1" opacity="0.35"/><line x1="555" y1="99" x2="695" y2="209" stroke="#9bb4e8" stroke-width="1" opacity="0.35"/><line x1="555" y1="99" x2="695" y2="253" stroke="#9bb4e8" stroke-width="1" opacity="0.35"/><line x1="555" y1="143" x2="695" y2="77" stroke="#9bb4e8" stroke-width="1" opacity="0.35"/><line x1="555" y1="143" x2="695" y2="121" stroke="#9bb4e8" stroke-width="1" opacity="0.35"/><line x1="555" y1="143" x2="695" y2="165" stroke="#9bb4e8" stroke-width="1" opacity="0.35"/><line x1="555" y1="143" x2="695" y2="209" stroke="#9bb4e8" stroke-width="1" opacity="0.35"/><line x1="555" y1="143" x2="695" y2="253" stroke="#9bb4e8" stroke-width="1" opacity="0.35"/><line x1="555" y1="187" x2="695" y2="77" stroke="#9bb4e8" stroke-width="1" opacity="0.35"/><line x1="555" y1="187" x2="695" y2="121" stroke="#9bb4e8" stroke-width="1" opacity="0.35"/><line x1="555" y1="187" x2="695" y2="165" stroke="#9bb4e8" stroke-width="1" opacity="0.35"/><line x1="555" y1="187" x2="695" y2="209" stroke="#9bb4e8" stroke-width="1" opacity="0.35"/><line x1="555" y1="187" x2="695" y2="253" stroke="#9bb4e8" stroke-width="1" opacity="0.35"/><line x1="555" y1="231" x2="695" y2="77" stroke="#9bb4e8" stroke-width="1" opacity="0.35"/><line x1="555" y1="231" x2="695" y2="121" stroke="#9bb4e8" stroke-width="1" opacity="0.35"/><line x1="555" y1="231" x2="695" y2="165" stroke="#9bb4e8" stroke-width="1" opacity="0.35"/><line x1="555" y1="231" x2="695" y2="209" stroke="#9bb4e8" stroke-width="1" opacity="0.35"/><line x1="555" y1="231" x2="695" y2="253" stroke="#9bb4e8" stroke-width="1" opacity="0.35"/><circle cx="95" cy="77" r="12" fill="#2f6fed" stroke="#2f6fed" stroke-width="2"/><circle cx="95" cy="121" r="12" fill="#2f6fed" stroke="#2f6fed" stroke-width="2"/><circle cx="95" cy="165" r="12" fill="#2f6fed" stroke="#2f6fed" stroke-width="2"/><circle cx="95" cy="209" r="12" fill="#2f6fed" stroke="#2f6fed" stroke-width="2"/><circle cx="95" cy="253" r="12" fill="#2f6fed" stroke="#2f6fed" stroke-width="2"/><text x="95" y="283" text-anchor="middle" font-size="20" fill="#5b6472">&#8942;</text><text x="95" y="302" text-anchor="middle" font-size="20" font-weight="700" fill="#1f2430">84</text><text x="95" y="322" text-anchor="middle" font-size="12" fill="#5b6472">INPUT</text><text x="95" y="338" text-anchor="middle" font-size="11" fill="#5b6472">sensor numbers</text><circle cx="255" cy="55" r="12" fill="#dbe6fb" stroke="#2f6fed" stroke-width="2"/><circle cx="255" cy="99" r="12" fill="#dbe6fb" stroke="#2f6fed" stroke-width="2"/><circle cx="255" cy="143" r="12" fill="#dbe6fb" stroke="#2f6fed" stroke-width="2"/><circle cx="255" cy="187" r="12" fill="#dbe6fb" stroke="#2f6fed" stroke-width="2"/><circle cx="255" cy="231" r="12" fill="#dbe6fb" stroke="#2f6fed" stroke-width="2"/><circle cx="255" cy="275" r="12" fill="#dbe6fb" stroke="#2f6fed" stroke-width="2"/><text x="255" y="305" text-anchor="middle" font-size="20" fill="#5b6472">&#8942;</text><text x="255" y="302" text-anchor="middle" font-size="20" font-weight="700" fill="#1f2430">512</text><text x="255" y="322" text-anchor="middle" font-size="12" fill="#5b6472">hidden</text><circle cx="405" cy="77" r="12" fill="#dbe6fb" stroke="#2f6fed" stroke-width="2"/><circle cx="405" cy="121" r="12" fill="#dbe6fb" stroke="#2f6fed" stroke-width="2"/><circle cx="405" cy="165" r="12" fill="#dbe6fb" stroke="#2f6fed" stroke-width="2"/><circle cx="405" cy="209" r="12" fill="#dbe6fb" stroke="#2f6fed" stroke-width="2"/><circle cx="405" cy="253" r="12" fill="#dbe6fb" stroke="#2f6fed" stroke-width="2"/><text x="405" y="283" text-anchor="middle" font-size="20" fill="#5b6472">&#8942;</text><text x="405" y="302" text-anchor="middle" font-size="20" font-weight="700" fill="#1f2430">256</text><text x="405" y="322" text-anchor="middle" font-size="12" fill="#5b6472">hidden</text><circle cx="555" cy="99" r="12" fill="#dbe6fb" stroke="#2f6fed" stroke-width="2"/><circle cx="555" cy="143" r="12" fill="#dbe6fb" stroke="#2f6fed" stroke-width="2"/><circle cx="555" cy="187" r="12" fill="#dbe6fb" stroke="#2f6fed" stroke-width="2"/><circle cx="555" cy="231" r="12" fill="#dbe6fb" stroke="#2f6fed" stroke-width="2"/><text x="555" y="261" text-anchor="middle" font-size="20" fill="#5b6472">&#8942;</text><text x="555" y="302" text-anchor="middle" font-size="20" font-weight="700" fill="#1f2430">128</text><text x="555" y="322" text-anchor="middle" font-size="12" fill="#5b6472">hidden</text><circle cx="695" cy="77" r="12" fill="#2f9e57" stroke="#2f9e57" stroke-width="2"/><circle cx="695" cy="121" r="12" fill="#2f9e57" stroke="#2f9e57" stroke-width="2"/><circle cx="695" cy="165" r="12" fill="#2f9e57" stroke="#2f9e57" stroke-width="2"/><circle cx="695" cy="209" r="12" fill="#2f9e57" stroke="#2f9e57" stroke-width="2"/><circle cx="695" cy="253" r="12" fill="#2f9e57" stroke="#2f9e57" stroke-width="2"/><text x="695" y="283" text-anchor="middle" font-size="20" fill="#5b6472">&#8942;</text><text x="695" y="302" text-anchor="middle" font-size="20" font-weight="700" fill="#1f2430">12</text><text x="695" y="322" text-anchor="middle" font-size="12" fill="#5b6472">OUTPUT</text><text x="695" y="338" text-anchor="middle" font-size="11" fill="#5b6472">motor targets</text><text x="405" y="26" text-anchor="middle" font-size="13" fill="#5b6472">each connection has a <tspan font-weight="700" fill="#1f2430">weight</tspan> &#183; layers use the <tspan font-weight="700" fill="#1f2430">ELU</tspan> activation</text><line x1="30" y1="165" x2="70" y2="165" stroke="#2f6fed" stroke-width="2.5" marker-end="url(#ah)"/><line x1="713" y1="165" x2="762" y2="165" stroke="#2f9e57" stroke-width="2.5" marker-end="url(#ahg)"/></svg>
+    <figcaption>The policy network. 84 sensor numbers flow left&#8594;right through three hidden layers (512, 256, 128 neurons) to 12 motor targets. Every line is a <strong>weight</strong> &mdash; training tunes hundreds of thousands of them.</figcaption>
+  </figure>
+
+  <ul>
+    <li><strong>Inputs (84):</strong> joint angles &amp; speeds, how tilted the torso is, how fast it's spinning, the walk command, and where it is in the step cycle.</li>
+    <li><strong>Hidden layers:</strong> three layers of <em>artificial neurons</em> (<code>policy_hidden_layer_sizes = (512, 256, 128)</code> in <code>ppo_config.py</code>). Each neuron computes a weighted sum of the previous layer and passes it through a simple nonlinear function (ELU).</li>
+    <li><strong>Outputs (12):</strong> a target position for each of the 12 leg motors, 50 times per second.</li>
+    <li><strong>Weights:</strong> every connection has a number (a "weight"). There are hundreds of thousands of them — <em>these</em> are what training changes. At the start they're random, so the robot flails.</li>
+  </ul>
+
+  <div class="callout">
+    <strong>How does it learn? Gradient descent.</strong> After each batch of trials, the trainer nudges every weight
+    a tiny bit in the direction that would have earned more reward (learning rate <code>3e-5</code>). Repeat millions
+    of times. No one tells it the "right" joint angles — it discovers them. This is the same math behind image and
+    language models; here the "grade" is reward instead of a labeled answer.
+  </div>
+
+  <div class="callout good">
+    <strong>Two networks: the student and the tutor (actor-critic).</strong> PPO actually trains <em>two</em> nets.
+    The <strong>policy (actor)</strong> decides actions from the 84 things the real robot can sense. A second
+    <strong>value network (critic)</strong> reads <strong>151</strong> numbers — including things only the simulator
+    knows, like true body velocity and foot contact forces — and estimates "how good is this situation?" The critic
+    coaches the actor during training, like a tutor with the answer key during study, then is thrown away at
+    deployment. The robot walks using the policy alone. This is a great "aha" for students: <em>the robot is
+    trained with more information than it's allowed to use when it performs.</em>
+  </div>
+  <figure class="diagram">
+    <svg viewBox="0 0 780 300" role="img" aria-label="Actor-critic: policy and value networks"><defs><marker id="ah" markerWidth="12" markerHeight="12" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#2f6fed"/></marker><marker id="ahg" markerWidth="12" markerHeight="12" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#2f9e57"/></marker></defs><rect x="270" y="35" width="240" height="80" rx="12" fill="#eaf1ff" stroke="#2f6fed" stroke-width="2.5"/><text x="390" y="66" text-anchor="middle" font-size="17" font-weight="700" fill="#1f2430">POLICY (actor)</text><text x="390" y="90" text-anchor="middle" font-size="13" fill="#5b6472">84 sensors &#8594; 12 motor targets</text><line x1="120" y1="75" x2="266" y2="75" stroke="#2f6fed" stroke-width="2.5" marker-end="url(#ah)"/><text x="120" y="60" text-anchor="middle" font-size="12" fill="#5b6472">84 real</text><text x="120" y="76" text-anchor="middle" font-size="12" fill="#5b6472">sensors</text><line x1="510" y1="75" x2="660" y2="75" stroke="#2f9e57" stroke-width="2.5" marker-end="url(#ahg)"/><text x="600" y="60" text-anchor="middle" font-size="12" fill="#5b6472">to motors</text><text x="390" y="132" text-anchor="middle" font-size="12.5" font-weight="700" fill="#2f9e57">used in sim AND on the real robot</text><rect x="270" y="185" width="240" height="80" rx="12" fill="#f0eafd" stroke="#6a4cf0" stroke-width="2.5"/><text x="390" y="216" text-anchor="middle" font-size="17" font-weight="700" fill="#1f2430">VALUE (critic)</text><text x="390" y="240" text-anchor="middle" font-size="13" fill="#5b6472">151 numbers &#8594; &#8220;how good is this?&#8221;</text><line x1="120" y1="225" x2="266" y2="225" stroke="#6a4cf0" stroke-width="2.5" marker-end="url(#ah)"/><text x="118" y="210" text-anchor="middle" font-size="12" fill="#5b6472">151 numbers</text><text x="118" y="226" text-anchor="middle" font-size="12" fill="#5b6472">(incl. sim-only)</text><text x="390" y="282" text-anchor="middle" font-size="12.5" font-weight="700" fill="#6a4cf0">training only &#183; thrown away at deployment</text><line x1="540" y1="200" x2="540" y2="110" stroke="#6a4cf0" stroke-width="2.5" marker-end="url(#ah)" opacity="0.8"/><text x="612" y="158" text-anchor="middle" font-size="12.5" font-weight="700" fill="#6a4cf0">coaches</text><text x="612" y="174" text-anchor="middle" font-size="12.5" font-weight="700" fill="#6a4cf0">the actor</text></svg>
+    <figcaption>Actor-critic. The <strong>critic</strong> peeks at extra sim-only information to grade situations and coach the <strong>actor</strong> during training &mdash; then it is discarded. The robot walks on the actor alone.</figcaption>
+  </figure>
+
+
+
+  <h2>Demo videos &amp; animations</h2>
+  <p>Short clips beat any slide. All of these ship with the repo — play them full-screen. Suggested talking point under each.</p>
+  <div class="media-grid">
+    <figure>
+      <img src="../_static/walk_faster.gif" alt="Learned walking gait">
+      <figcaption><strong>Walk</strong> — the skill your students will train. <span class="teach-note">"Nobody typed these joint angles."</span></figcaption>
+    </figure>
+    <figure>
+      <img src="../_static/cartwheel_failures.gif" alt="Failed cartwheel attempts during training">
+      <figcaption><strong>Failed attempts</strong> — early in training the policy flails and falls. <span class="teach-note">This IS learning: trial and error.</span></figcaption>
+    </figure>
+    <figure>
+      <img src="../_static/cartwheel.gif" alt="Learned cartwheel">
+      <figcaption><strong>Cartwheel</strong> — the same recipe, a wilder reward. <span class="teach-note">"What would you reward for this?"</span></figcaption>
+    </figure>
+    <figure>
+      <img src="../_static/crawl.gif" alt="Learned crawling skill">
+      <figcaption><strong>Crawl</strong> — one of several skills in the repo. <span class="teach-note">Different <code>--env</code>, same method.</span></figcaption>
+    </figure>
+    <figure>
+      <video src="../../renders/toddler_pushup.mp4" controls muted loop playsinline></video>
+      <figcaption><strong>Push-up</strong> replay in MuJoCo — the "watch the robot" moment for Session&nbsp;1.</figcaption>
+    </figure>
+    <figure>
+      <video src="../../renders/turntable_3_0_2xc.mp4" controls muted loop playsinline></video>
+      <figcaption><strong>The robot model</strong> — a spin around the humanoid students are controlling.</figcaption>
+    </figure>
+  </div>
+  <div class="callout">
+    <strong>More footage to pull from:</strong> the project pages have longer, higher-quality videos —
+    <a href="https://toddlerbot.github.io/">toddlerbot.github.io</a>,
+    <a href="https://locomotion-beyond-feet.github.io/">locomotion-beyond-feet.github.io</a>, and the
+    <a href="https://youtu.be/A43QxHSgLyM">overview video on YouTube</a>. Great for the opening hook and the wrap-up.
+  </div>
+
+  <h2>Session 1 — "Meet the robot and the RL loop"</h2>
+  <p><em>Goal: build RL intuition and get hands in the simulator. No training yet.</em></p>
+  <div class="session">
+
+    <div class="hour">
+      <span class="label">Hour 1</span>
+      <h4>RL intuition, no code (whiteboard + discussion)</h4>
+      <ul>
+        <li>Trial-and-error learning: pets, video games, learning to ride a bike. What's the "reward"?</li>
+        <li>Introduce the loop diagram above. Contrast with "just program the walk" — why that's brittle for a humanoid.</li>
+        <li><strong>Interactive:</strong> "You're the reward designer. A robot should walk forward. What do you reward? What goes wrong?" Their naive ideas (reward forward speed only &rarr; robot dives/faceplants) are exactly what real reward shaping wrestles with.</li>
+      </ul>
+    </div>
+
+    <div class="hour">
+      <span class="label">Hour 2</span>
+      <h4>The brain + hands in the sim (on the group machines)</h4>
+      <ul>
+        <li><strong>First ~20 min: "the robot's brain"</strong> (the deep-learning section above). Draw the 84&rarr;12 network on the board; have students name a few of the 84 inputs and the 12 outputs. Land the idea that <em>training just tunes the weights</em>.</li>
+        <li>On each group's 3080 machine (repo pre-installed), run a motion replay so they see the robot immediately:</li>
+      </ul>
+      <pre><code>python toddlerbot/policies/run_policy.py --policy replay --path motion/push_up_2xc.lz4</code></pre>
+      <ul>
+        <li>Load a <strong>pre-trained walk policy</strong> and watch it walk. Then perturb it live: change the walk command (speed/turn), add a push. Robustness = "it learned to recover," not scripted.</li>
+        <li>Have them narrate the loop diagram against what they see on screen — where are the 84 inputs coming from? Where do the 12 outputs go?</li>
+      </ul>
+    </div>
+
+    <div class="hour">
+      <span class="label">Hour 3</span>
+      <h4>Read the reward, form hypotheses</h4>
+      <ul>
+        <li>Open <code>walk_env.py</code> together; walk through 4–5 reward terms in plain English.</li>
+        <li><strong>Group worksheet:</strong> for each term, "what behavior does this encourage / what breaks if you delete it?" Each group commits to a <strong>hypothesis</strong> to test next session (e.g. "remove the upright/roll reward &rarr; it walks tilted or falls").</li>
+        <li><em>Optional (if there's a gap before Session 2):</em> kick off one scaled-down training run to leave going, so Session 2 opens with a finished curve to look at.</li>
+      </ul>
+    </div>
+
+  </div>
+
+  <h2>Session 2 — "Shape the reward, train the robot"</h2>
+  <p><em>Goal: understand PPO at a high level, then run and compare real training experiments.</em></p>
+  <div class="session">
+
+    <div class="hour">
+      <span class="label">Hour 1</span>
+      <h4>How PPO learns + launch a baseline run</h4>
+      <ul>
+        <li>PPO at high-school altitude: try actions, keep what earned reward, 4096 robots exploring at once. No derivations — use the "4096 toddlers learning to walk simultaneously" image.</li>
+        <li>Each group launches the <strong>scaled-down baseline</strong> training on its 3080 and watches the reward curve climb in real time in <strong>Weights &amp; Biases</strong> (the repo already logs to <code>wandb</code>).</li>
+      </ul>
+    </div>
+
+    <div class="hour">
+      <span class="label">Hour 2</span>
+      <h4>The reward-shaping experiment (the core project)</h4>
+      <ul>
+        <li>Each group edits the config to test their Session-1 hypothesis: zero out or change a reward weight, or change the target walk speed. One-line edits in the gin/config.</li>
+        <li>They launch a short run on their 3080 and compare their curve + behavior video against the baseline and the pre-trained "gold" policy.</li>
+        <li>This is where the learning happens: "we removed the foot-slip penalty and it learned to skate."</li>
+        <li><strong>Hand-off:</strong> if a group's experiment looks promising, kick the same config off on an <strong>RTX&nbsp;6000 Blackwell</strong> for a longer run so they can see the converged payoff in the next break or by wrap-up.</li>
+      </ul>
+    </div>
+
+    <div class="hour">
+      <span class="label">Hour 3</span>
+      <h4>Sim-to-real, present, and wrap</h4>
+      <ul>
+        <li><strong>Sim-to-real demo (~25 min):</strong> re-train or reload with pushes turned on (<code>DomainRandConfig.add_push = True</code>) and shove the robot in sim — it stays up. Use it to teach the <strong>reality gap</strong> and <strong>domain randomization</strong> (full section below). Show the punchline: the <em>same</em> policy file runs in sim (<code>--sim mujoco</code>) or on the real robot (<code>--sim real</code>).</li>
+        <li><strong>Presentations:</strong> each group gives a 2-minute show-and-tell — hypothesis, reward curve, video, what actually happened (and any reward hacking they caught).</li>
+        <li><strong>Wrap + tee up Session&nbsp;3:</strong> revisit the AI&rarr;ML&rarr;DL&rarr;RL ladder — they've now touched every rung. The cliffhanger: "your policy walks in sim… but will it walk on the <em>real</em> robot? Next time we find out."</li>
+      </ul>
+    </div>
+
+  </div>
+
+  <h2>Session 3 — "Sim-to-real: make it walk in the room"</h2>
+  <p><em>Goal: take a trained policy onto the physical ToddlerBot, measure the sim-to-real gap, and iterate to shrink it. Requires one robot per group.</em></p>
+  <div class="callout warn">
+    <strong>Safety first — real humanoids, real risk.</strong> Robots on a <strong>safety stand / harness</strong> for
+    first runs, a <strong>clear zone</strong> around each bench, a known <strong>kill switch</strong>, and one rule
+    students repeat back: <strong>never grab a falling robot</strong> — let it fall, hit stop. Brief this before any
+    motor is powered.
+  </div>
+  <div class="callout">
+    <strong>Which policy do they deploy?</strong> Their 15-minute Session-2 policies usually aren't robust enough for
+    hardware, so each group deploys a <strong>provided "gold" checkpoint</strong> (trained to convergence on a
+    6000) as the baseline, and may try their own as a stretch goal. Print the
+    <a href="sim2real_cheatsheet.html">one-page cheat sheet</a> — it's the bench reference for the whole session —
+    and give each group the <a href="sim2real_lab_sheet.html">Session&nbsp;3 lab sheet</a> to fill in as they go
+    (safety check-off, predict/observe boxes, the diagnose table, before/after comparison).
+    For yourself, run it from the <a href="session3_run_of_show.html">Session&nbsp;3 run-of-show</a> —
+    a minute-by-minute timeline with a gotcha playbook (robots that won't stand, gold policy still falling, jammed retrain queue).
+  </div>
+  <div class="session">
+
+    <div class="hour">
+      <span class="label">Hour 1</span>
+      <h4>Safety, calibrate, and first contact with reality</h4>
+      <ul>
+        <li><strong>Safety briefing (~10 min)</strong> — the callout above, demonstrated on one robot.</li>
+        <li><strong>Calibrate &amp; stand (~20 min):</strong> zero-calibrate the motors (<code>tools/calibrate_zero.py</code>), then confirm a clean stand: <code>run_policy.py --policy stand --sim real</code>. If it can't stand still, it can't walk — fix this first.</li>
+        <li><strong>Re-test in sim (~10 min):</strong> run the exact policy file with <code>--sim mujoco</code> so you know the brain is good before trusting hardware.</li>
+        <li><strong>Predict, then deploy (~20 min):</strong> each group writes down what they expect, then runs <code>run_policy.py --policy walk --sim real --record</code>. Reality is almost always imperfect — leaning, drifting, tip-toe, or a fall. Record it; that recording is the data for Hour&nbsp;2.</li>
+      </ul>
+    </div>
+
+    <div class="hour">
+      <span class="label">Hour 2</span>
+      <h4>Diagnose the gap (this is the science)</h4>
+      <ul>
+        <li><strong>Overlay sim vs real (~30 min):</strong> run <code>tools/sim2real_eval.py</code> on their recording to overlay motor position/velocity/torque and IMU. Groups fill the <strong>diagnose table</strong> on the cheat sheet — <em>where</em> do the curves split?</li>
+        <li><strong>Classify &amp; hypothesize (~10 min):</strong> calibration offset? motor lag? latency? mass/friction? overfit? Each group names the failure and <strong>which of the two knobs</strong> they'll turn (match the sim, or make the policy robust).</li>
+        <li><strong>Apply the cheapest fix (~20 min):</strong> on the standing robot the live knobs are <strong>calibration</strong> (redeploy immediately, no retrain) and <strong>domain randomization</strong> (retrain). If the gap points to the actuator model, that's a <em>system-ID</em> issue — a separate bench procedure done ahead of time, not live here (see the <a href="system_id.html">sysID page</a>); use it as a teaching moment, and rely on a pre-fitted model. <strong>Hand-off:</strong> any fix needing a full retrain goes to the instructor's <strong>6000s</strong> while the group keeps analyzing.</li>
+      </ul>
+    </div>
+
+    <div class="hour">
+      <span class="label">Hour 3</span>
+      <h4>Close the loop, demo, reflect</h4>
+      <ul>
+        <li><strong>Redeploy with the fix (~25 min):</strong> run again, record, and overlay <strong>before vs after</strong> in <code>sim2real_eval.py</code>. Did the gap shrink? Groups whose fix needed a retrain deploy the 6000-retrained variant.</li>
+        <li><strong>Iterate once more</strong> if time allows — the loop is the lesson.</li>
+        <li><strong>Demos (~15 min):</strong> each group shows a before/after video + overlay, states which knob they turned and why, and what's still off.</li>
+        <li><strong>Wrap (~10 min):</strong> the two-knobs mental model, "this loop <em>is</em> the research," and the honest truth that nobody nails transfer on the first try. Tease the frontier: push-recovery and multi-skill locomotion.</li>
+      </ul>
+    </div>
+
+  </div>
+  <div class="callout good">
+    <strong>Session 3 deliverables per group:</strong> a before/after real-robot video, a filled diagnose table, and
+    one sentence — "we turned <em>this</em> knob because the overlay showed <em>that</em>." <strong>Success =</strong>
+    the robot takes real steps <em>and</em> the group can point to the gap they closed (not necessarily a perfect walk).
+  </div>
+  <p>The next three sections are the <strong>reference material</strong> Session&nbsp;3 draws on — read them before running it.</p>
+
+  <h2>Sim-to-real: crossing the reality gap</h2>
+  <p>This is the idea that makes robot learning special, and students find it genuinely surprising. Budget real time for it in Session&nbsp;2.</p>
+
+  <h3>Why train in a simulator at all?</h3>
+  <ul>
+    <li><strong>Speed &amp; scale:</strong> the sim runs <strong>4096 robots in parallel, faster than real time</strong>. The full walk sees ~1 billion timesteps — that's centuries of real-world practice, done in hours.</li>
+    <li><strong>Safety &amp; cost:</strong> a falling sim robot costs nothing. A real one breaks. Early policies fall constantly.</li>
+    <li><strong>Perfect information:</strong> in sim you know everything (true velocity, contact forces) — which is how the critic network can coach the policy.</li>
+  </ul>
+
+  <h3>The catch: the reality gap</h3>
+  <div class="callout warn">
+    A simulator is <strong>not</strong> reality. Real friction, motor delays, sensor noise, and slightly-wrong masses
+    all differ from the sim. A policy that gets <em>too</em> good at the sim's exact quirks — a form of
+    <strong>overfitting</strong> — can walk beautifully on screen and fall over on the real robot. That failure is
+    the <strong>sim-to-real gap</strong>.
+  </div>
+
+  <h3>The fix: domain randomization</h3>
+  <p>Instead of one perfect simulator, train across <strong>thousands of slightly different, randomized</strong> ones. Each episode, the sim rolls new physics. To survive <em>all</em> of them, the policy has to learn a robust, general walk — and then the real world just looks like "one more variation it already handles." These are the actual quantities ToddlerBot randomizes (<code>DomainRandConfig</code> in <code>mjx_config.py</code>):</p>
+  <table>
+    <thead><tr><th>What's randomized</th><th>Why it matters for the real robot</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Ground friction</strong> (0.4&ndash;1.0&times;)</td><td>Real floors are more or less slippery than the default.</td></tr>
+      <tr><td><strong>Body mass</strong> (&plusmn;20%)</td><td>The CAD model never matches the built robot exactly.</td></tr>
+      <tr><td><strong>Motor strength &amp; gains</strong> (kp/kd, torque &plusmn;10%)</td><td>Real motors vary unit-to-unit and heat up over time.</td></tr>
+      <tr><td><strong>Control delay &amp; gear backlash</strong></td><td>Real commands arrive late and joints have a little slop.</td></tr>
+      <tr><td><strong>Random shoves</strong> (a push every ~2&nbsp;s)</td><td>Teaches active balance recovery — the visible "wow" demo.</td></tr>
+      <tr><td><strong>Starting tilt of the torso</strong></td><td>The robot won't always start perfectly upright.</td></tr>
+    </tbody>
+  </table>
+
+  <figure class="diagram">
+    <svg viewBox="0 0 780 250" role="img" aria-label="Domain randomization across many simulators"><defs><marker id="ah" markerWidth="12" markerHeight="12" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#2f6fed"/></marker><marker id="ahg" markerWidth="12" markerHeight="12" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#2f9e57"/></marker></defs><rect x="30" y="90" width="150" height="70" rx="12" fill="#eaf1ff" stroke="#2f6fed" stroke-width="2.5"/><text x="105" y="120" text-anchor="middle" font-size="14" font-weight="700" fill="#1f2430">1 simulator</text><text x="105" y="140" text-anchor="middle" font-size="12" fill="#5b6472">randomized</text><rect x="300" y="20" width="180" height="34" rx="8" fill="#fff" stroke="#5b6472" stroke-width="1.5"/><text x="390" y="42" text-anchor="middle" font-size="12.5" fill="#1f2430">more slippery</text><line x1="180" y1="125" x2="296" y2="37" stroke="#2f6fed" stroke-width="1.8" opacity="0.6" marker-end="url(#ah)"/><rect x="300" y="68" width="180" height="34" rx="8" fill="#fff" stroke="#5b6472" stroke-width="1.5"/><text x="390" y="90" text-anchor="middle" font-size="12.5" fill="#1f2430">heavier body</text><line x1="180" y1="125" x2="296" y2="85" stroke="#2f6fed" stroke-width="1.8" opacity="0.6" marker-end="url(#ah)"/><rect x="300" y="116" width="180" height="34" rx="8" fill="#fff" stroke="#5b6472" stroke-width="1.5"/><text x="390" y="138" text-anchor="middle" font-size="12.5" fill="#1f2430">weaker motors</text><line x1="180" y1="125" x2="296" y2="133" stroke="#2f6fed" stroke-width="1.8" opacity="0.6" marker-end="url(#ah)"/><rect x="300" y="164" width="180" height="34" rx="8" fill="#fff" stroke="#5b6472" stroke-width="1.5"/><text x="390" y="186" text-anchor="middle" font-size="12.5" fill="#1f2430">control delay</text><line x1="180" y1="125" x2="296" y2="181" stroke="#2f6fed" stroke-width="1.8" opacity="0.6" marker-end="url(#ah)"/><rect x="300" y="212" width="180" height="34" rx="8" fill="#fff" stroke="#5b6472" stroke-width="1.5"/><text x="390" y="234" text-anchor="middle" font-size="12.5" fill="#1f2430">random shove</text><line x1="180" y1="125" x2="296" y2="229" stroke="#2f6fed" stroke-width="1.8" opacity="0.6" marker-end="url(#ah)"/><rect x="560" y="80" width="200" height="90" rx="12" fill="#eefaf0" stroke="#2f9e57" stroke-width="2.5"/><text x="660" y="112" text-anchor="middle" font-size="14" font-weight="700" fill="#1f2430">Robust policy</text><text x="660" y="134" text-anchor="middle" font-size="11.5" fill="#5b6472">the real world =</text><text x="660" y="150" text-anchor="middle" font-size="11.5" fill="#5b6472">just one more variation</text><line x1="480" y1="37" x2="556" y2="125" stroke="#2f9e57" stroke-width="1.8" opacity="0.5" marker-end="url(#ahg)"/><line x1="480" y1="85" x2="556" y2="125" stroke="#2f9e57" stroke-width="1.8" opacity="0.5" marker-end="url(#ahg)"/><line x1="480" y1="133" x2="556" y2="125" stroke="#2f9e57" stroke-width="1.8" opacity="0.5" marker-end="url(#ahg)"/><line x1="480" y1="181" x2="556" y2="125" stroke="#2f9e57" stroke-width="1.8" opacity="0.5" marker-end="url(#ahg)"/><line x1="480" y1="229" x2="556" y2="125" stroke="#2f9e57" stroke-width="1.8" opacity="0.5" marker-end="url(#ahg)"/></svg>
+    <figcaption>Domain randomization. Train across thousands of randomized sims and the policy must learn a robust, general skill &mdash; so the messy real world looks like just one more variation it already handles.</figcaption>
+  </figure>
+  <p class="callout"><strong>Class activity:</strong> flip <code>add_push = True</code> and shove the robot in the viewer. Then ask: "why would practicing with random shoves in sim help it handle being bumped in real life?" That's domain randomization in one sentence.</p>
+
+  <h3>From sim to the physical ToddlerBot</h3>
+  <p>The same trained network runs in both worlds — only where the 84 input numbers come from changes:</p>
+  <figure class="diagram">
+    <svg viewBox="0 0 780 280" role="img" aria-label="From simulator training to the real robot"><defs><marker id="ah" markerWidth="12" markerHeight="12" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#2f6fed"/></marker><marker id="ahg" markerWidth="12" markerHeight="12" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#2f9e57"/></marker></defs><rect x="30" y="45" width="210" height="80" rx="12" fill="#eaf1ff" stroke="#2f6fed" stroke-width="2.5"/><text x="135.0" y="81.0" text-anchor="middle" font-size="15" font-weight="700" fill="#1f2430">Train in MuJoCo (MJX)</text><text x="135.0" y="103.0" text-anchor="middle" font-size="12" fill="#5b6472">4096 robots on GPU</text><rect x="300" y="45" width="180" height="80" rx="12" fill="#f0eafd" stroke="#6a4cf0" stroke-width="2.5"/><text x="390.0" y="81.0" text-anchor="middle" font-size="15" font-weight="700" fill="#1f2430">Export to ONNX</text><text x="390.0" y="103.0" text-anchor="middle" font-size="12" fill="#5b6472">one small policy file</text><rect x="540" y="45" width="210" height="80" rx="12" fill="#eefaf0" stroke="#2f9e57" stroke-width="2.5"/><text x="645.0" y="81.0" text-anchor="middle" font-size="15" font-weight="700" fill="#1f2430">run_policy.py</text><text x="645.0" y="103.0" text-anchor="middle" font-size="12" fill="#5b6472">same file, two worlds</text><line x1="240" y1="85" x2="296" y2="85" stroke="#2f6fed" stroke-width="3" marker-end="url(#ah)"/><line x1="480" y1="85" x2="536" y2="85" stroke="#2f6fed" stroke-width="3" marker-end="url(#ah)"/><line x1="645" y1="125" x2="645" y2="150" stroke="#5b6472" stroke-width="2"/><rect x="360" y="175" width="190" height="80" rx="12" fill="#eaf1ff" stroke="#2f6fed" stroke-width="2.5"/><text x="455.0" y="211.0" text-anchor="middle" font-size="15" font-weight="700" fill="#1f2430">--sim mujoco</text><text x="455.0" y="233.0" text-anchor="middle" font-size="12" fill="#5b6472">test safely in sim</text><rect x="590" y="175" width="165" height="80" rx="12" fill="#eefaf0" stroke="#2f9e57" stroke-width="2.5"/><text x="672.5" y="211.0" text-anchor="middle" font-size="15" font-weight="700" fill="#1f2430">--sim real</text><text x="672.5" y="233.0" text-anchor="middle" font-size="12" fill="#5b6472">on the physical robot</text><path d="M645 150 L455 150 L455 171" fill="none" stroke="#2f6fed" stroke-width="2.5" marker-end="url(#ah)"/><path d="M645 150 L672 150 L672 171" fill="none" stroke="#2f9e57" stroke-width="2.5" marker-end="url(#ahg)"/><text x="500" y="272" text-anchor="middle" font-size="11.5" fill="#5b6472">inputs from the simulator</text><text x="672" y="272" text-anchor="middle" font-size="11.5" fill="#5b6472">inputs from IMU + encoders</text></svg>
+    <figcaption>One trained policy, two worlds. Only the source of the 84 input numbers changes: the simulator (<code>--sim mujoco</code>) or the real robot&#8217;s sensors (<code>--sim real</code>).</figcaption>
+  </figure>
+  <p>Point students at <code>run_policy.py</code>: the <code>--sim mujoco</code> vs <code>--sim real</code> flag is the whole handoff. On real hardware the 84-number observation is assembled from the robot's IMU and joint encoders instead of the simulator, and the 12 outputs drive actual motors 50 times a second.</p>
+
+  <h2>After training: deploying and iterating</h2>
+  <p>Training produces a policy file &mdash; getting it to walk <em>on the real robot</em> is a second project, and it's where most real work happens. This is advanced material: use it for the Session&nbsp;2 wrap, an extension day, or your own reference.</p>
+
+  <h3>From a finished run to the robot</h3>
+  <ol>
+    <li><strong>Training's output:</strong> <code>train_mjx.py</code> saves your run to <code>results/&lt;run_name&gt;/</code> and exports the policy to <strong><code>model_best.onnx</code></strong> (also uploaded to W&amp;B). That small ONNX file <em>is</em> the deployable brain &mdash; the 84&#8594;12 network, frozen.</li>
+    <li><strong>Re-test the ONNX in sim first.</strong> Export bugs (observation order, scaling) are common. Run the exported file in MuJoCo before touching hardware:
+      <pre><code>python toddlerbot/policies/run_policy.py --policy walk --sim mujoco --vis view</code></pre>
+      If it misbehaves here, the bug is in export, not sim-to-real.</li>
+    <li><strong>Prep the hardware:</strong> zero-calibrate the motors (<code>tools/calibrate_zero.py</code> &mdash; a few degrees of ankle/hip offset will topple a walk), confirm a clean stand (<code>--policy stand --sim real</code>), and use the safety stand for first runs.</li>
+    <li><strong>Deploy and record:</strong>
+      <pre><code>python toddlerbot/policies/run_policy.py --policy walk --sim real --record</code></pre>
+      Now the 84 inputs come from the <strong>IMU + encoders</strong> and the 12 outputs drive real motors at ~50&nbsp;Hz. <code>--record</code> logs the rollout so you can measure the gap.</li>
+  </ol>
+
+  <h3>"It walks in sim but not on the robot" &mdash; the iteration loop</h3>
+  <p>This is the sim-to-real gap in practice. The golden rule: <strong>measure the gap before changing anything.</strong> The repo gives you a principled loop, not guesswork.</p>
+
+  <figure class="diagram">
+    <svg viewBox="0 0 780 250" role="img" aria-label="The sim-to-real iteration loop"><defs><marker id="ai" markerWidth="12" markerHeight="12" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#5b6472"/></marker></defs><rect x="15" y="45" width="165" height="70" rx="12" fill="#eaf1ff" stroke="#2f6fed" stroke-width="2.5"/><text x="97.5" y="75" text-anchor="middle" font-size="16" font-weight="700" fill="#1f2430">1. Deploy</text><text x="97.5" y="97" text-anchor="middle" font-size="11.5" fill="#5b6472">--sim real, --record</text><rect x="205" y="45" width="165" height="70" rx="12" fill="#f0eafd" stroke="#6a4cf0" stroke-width="2.5"/><text x="287.5" y="75" text-anchor="middle" font-size="16" font-weight="700" fill="#1f2430">2. Measure gap</text><text x="287.5" y="97" text-anchor="middle" font-size="11.5" fill="#5b6472">sim2real_eval.py</text><rect x="395" y="45" width="165" height="70" rx="12" fill="#fff7e6" stroke="#e0a92e" stroke-width="2.5"/><text x="477.5" y="75" text-anchor="middle" font-size="16" font-weight="700" fill="#1f2430">3. Fix</text><text x="477.5" y="97" text-anchor="middle" font-size="11.5" fill="#5b6472">calibrate / sysID / DR</text><rect x="585" y="45" width="165" height="70" rx="12" fill="#eefaf0" stroke="#2f9e57" stroke-width="2.5"/><text x="667.5" y="75" text-anchor="middle" font-size="16" font-weight="700" fill="#1f2430">4. Retrain</text><text x="667.5" y="97" text-anchor="middle" font-size="11.5" fill="#5b6472">only if needed</text><line x1="180" y1="80.0" x2="205" y2="80.0" stroke="#5b6472" stroke-width="2.5" marker-end="url(#ai)"/><line x1="370" y1="80.0" x2="395" y2="80.0" stroke="#5b6472" stroke-width="2.5" marker-end="url(#ai)"/><line x1="560" y1="80.0" x2="585" y2="80.0" stroke="#5b6472" stroke-width="2.5" marker-end="url(#ai)"/><path d="M667 115 L667 190 L97 190 L97 118" fill="none" stroke="#5b6472" stroke-width="2.5" stroke-dasharray="6 5" marker-end="url(#ai)"/><text x="382" y="182" text-anchor="middle" font-size="13" font-weight="700" fill="#5b6472">repeat &mdash; the gap shrinks each loop</text><text x="382" y="222" text-anchor="middle" font-size="12" fill="#5b6472">do the no-retrain fixes (1&#8211;3) before spending GPU hours on step 4</text></svg>
+    <figcaption>The sim-to-real iteration loop. Deploy and record &#8594; measure where sim and real diverge &#8594; apply the cheapest fix &#8594; retrain only if you must &#8594; repeat.</figcaption>
+  </figure>
+
+  <h3>Diagnose first: what does the gap look like?</h3>
+  <p>Record a real rollout and overlay it against sim with <code>tools/sim2real_eval.py</code> (it plots motor position, velocity, torque, and IMU, sim vs real). <em>Where</em> the curves split tells you the cause &mdash; and the cheapest fix:</p>
+  <table>
+    <thead><tr><th>What you see in the overlay</th><th>Likely cause</th><th>Fix (cheapest first)</th></tr></thead>
+    <tbody>
+      <tr><td>Constant offset; robot leans one way</td><td>Motor <strong>zero / calibration</strong> off</td><td><code>calibrate_zero.py</code> &mdash; no retrain</td></tr>
+      <tr><td>Real motors lag or undershoot the command</td><td><strong>Actuator model</strong> too strong/fast in sim</td><td>System ID — bench procedure, done ahead of time (below)</td></tr>
+      <tr><td>Right shape, shifted in time</td><td><strong>Latency</strong> mismatch</td><td>tune <code>n_steps_delay</code></td></tr>
+      <tr><td>Tips over under load / when moving</td><td><strong>Mass / friction / inertia</strong> wrong</td><td>measure (<code>test_mass.py</code>), fix MJCF, or widen DR</td></tr>
+      <tr><td>Every metric matches but it's still unstable</td><td>Policy <strong>overfit</strong> to sim quirks</td><td>widen domain randomization + retrain</td></tr>
+    </tbody>
+  </table>
+
+  <h3>The two fixes: system ID and domain randomization</h3>
+  <ul>
+    <li><strong>Make the sim match the robot (fixes bias):</strong> <code>tools/run_sysID.py</code> uses Optuna to fit the sim's motor dynamics (torque/speed limits, damping, friction) to real data collected on a <strong>single-motor bench fixture</strong> (per motor type, once). Re-run <code>sim2real_eval.py</code> to confirm the sim now tracks reality. <em>No policy retrain needed &mdash; you're making the simulator honest.</em> Full walkthrough on the <a href="system_id.html">system-identification page</a>.</li>
+    <li><strong>Make the policy not care (fixes variance):</strong> widen the ranges in <code>DomainRandConfig</code> around your identified values and turn on perturbations, then retrain on a 6000:
+      <pre><code>DomainRandConfig.add_push = True          # learn to recover from shoves
+DomainRandConfig.friction_range = [0.3, 1.1]
+DomainRandConfig.kp_range = [0.8, 1.2]    # motor-gain spread</code></pre>
+    </li>
+  </ul>
+  <div class="callout good">
+    <strong>The mental model to teach:</strong> there are two knobs, and students should always name which one they're turning &mdash;
+    <strong>make the sim match the robot</strong> (system ID, calibration, better model) or
+    <strong>make the policy robust to being wrong</strong> (domain randomization). You almost always need both.
+    Honest note for the class: <em>this loop is the actual research</em> &mdash; making cheap-robot transfer reliable is a big part of what the ToddlerBot papers contribute.
+  </div>
+  <p><span class="teach-note">Handout</span> &nbsp;A printable one-page summary of this whole loop lives in
+    <a href="sim2real_cheatsheet.html">sim2real_cheatsheet.html</a> &mdash; deploy steps, the loop diagram, the diagnose table, and the two-knobs model on a single sheet (A4/Letter). Print it for the sim-to-real segment.</p>
+
+  <h2>Instructor prep checklist</h2>
+  <p>Budget a few hours before the first session.</p>
+  <ol>
+    <li><strong>Pre-train 1–2 checkpoints on the RTX&nbsp;6000 Blackwells</strong> (a good walk, maybe one "broken reward" example) to demo — these are your reliable ground truth. With 4 cards you can train several skills/variants in parallel.</li>
+    <li><strong>Class config (ready to use):</strong> <a href="../../toddlerbot/locomotion/walk_class.gin"><code>walk_class.gin</code></a> scales the run down (~30M timesteps, 2048 envs) so it shows clear improvement in ~10–15&nbsp;min. Layer it on top of walk:
+      <pre><code>python toddlerbot/locomotion/train_mjx.py --env walk --gin-file "walk walk_class"</code></pre>
+      Time it on a 3080 first; the 10&nbsp;GB of VRAM should hold 2048 envs, but drop <code>num_envs</code> to 1024 if you hit out-of-memory.</li>
+    <li><strong>Prep the two 3080 group machines:</strong> repo installed, checkpoints downloaded, W&amp;B logged in, and a one-line launch script for replay / load-policy / train. Hide the messy setup so students spend time on concepts, not <code>pip</code>. (No cloud needed — everything runs locally.)</li>
+    <li><strong>Reward worksheet (ready to use):</strong> <a href="rl_reward_worksheet.html">rl_reward_worksheet.html</a> — the 10 active reward terms with blanks for "what it encourages / what breaks at 0," a prediction section, the exact run commands, and a collapsible instructor answer key. Print-friendly.</li>
+    <li><strong>Seed hypotheses</strong> so no group is stuck at a blank page.</li>
+    <li><strong>Session&nbsp;3 (hardware) prep:</strong> each robot charged, zero-calibrated, and pre-loaded with a <strong>gold walk checkpoint</strong>; safety stands/harnesses and a kill switch per bench; the sysID sweep + <code>run_sysID.py</code> pipeline tested end-to-end beforehand; a <strong>retrain queue on the 6000s</strong> ready for hand-offs; the <a href="sim2real_cheatsheet.html">cheat sheet</a> + <a href="sim2real_lab_sheet.html">lab sheet</a> printed for every group; and your own <a href="session3_run_of_show.html">run-of-show</a> (minute-by-minute + gotcha playbook) to hand.</li>
+  </ol>
+
+  <h2>If you have more time (extensions)</h2>
+  <ul>
+    <li><strong>Try a different skill:</strong> the repo ships gin files for <code>crawl</code>, <code>get_up</code>, <code>cartwheel</code>, stairs, and more — same command, different <code>--env</code>. Great for "what reward would <em>you</em> write for a cartwheel?"</li>
+    <li><strong>Harder world:</strong> switch on rough terrain or stairs (<code>TerrainConfig</code>) and watch a flat-ground policy struggle, then retrain.</li>
+    <li><strong>Speed limits:</strong> widen or narrow the command range and see how fast it can learn to walk before it falls.</li>
+    <li><strong>Converged payoff:</strong> run a group's best experiment to (near) convergence on an RTX&nbsp;6000 Blackwell and compare the video to their 15-minute version.</li>
+    <li><strong>Real deployment</strong> (if you have a physical ToddlerBot): take a policy the students trained and run it with <code>--sim real</code>. Nothing beats seeing <em>their</em> reward function walk in the room.</li>
+  </ul>
+
+  <h2>Key terms (glossary)</h2>
+  <table>
+    <thead><tr><th>Term</th><th>Plain-English meaning</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Agent</strong></td><td>The learner/decision-maker. Here: the policy network.</td></tr>
+      <tr><td><strong>Environment</strong></td><td>The world the agent acts in. Here: the MuJoCo physics sim.</td></tr>
+      <tr><td><strong>State / Observation</strong></td><td>What the agent knows right now — the 84 sensor numbers.</td></tr>
+      <tr><td><strong>Action</strong></td><td>What the agent does — the 12 motor targets.</td></tr>
+      <tr><td><strong>Reward</strong></td><td>A number scoring how good the last action was. The agent tries to maximize the total over time.</td></tr>
+      <tr><td><strong>Policy</strong></td><td>The agent's strategy — the neural network mapping observations to actions.</td></tr>
+      <tr><td><strong>Episode</strong></td><td>One attempt, from start until the robot falls or time runs out (up to 1000 steps).</td></tr>
+      <tr><td><strong>Neural network</strong></td><td>A stack of layers of simple "neurons" with tunable weights that together compute a complex function.</td></tr>
+      <tr><td><strong>Weights</strong></td><td>The numbers inside the network that training adjusts. Learning = finding good weights.</td></tr>
+      <tr><td><strong>Gradient descent</strong></td><td>The method for improving weights: nudge each one in the direction that increases reward.</td></tr>
+      <tr><td><strong>PPO</strong></td><td>Proximal Policy Optimization — the specific RL algorithm used here to update the policy safely.</td></tr>
+      <tr><td><strong>Actor-critic</strong></td><td>Training with two networks: an actor (the policy) and a critic that estimates how good states are.</td></tr>
+      <tr><td><strong>Domain randomization</strong></td><td>Randomizing sim physics each episode so the policy generalizes to the real world.</td></tr>
+      <tr><td><strong>Sim-to-real gap</strong></td><td>The performance drop when a sim-trained policy meets messy reality.</td></tr>
+      <tr><td><strong>Reward hacking</strong></td><td>When an agent maximizes the literal reward in an unintended way.</td></tr>
+      <tr><td><strong>Overfitting</strong></td><td>Getting too specialized to the training conditions and failing on new ones.</td></tr>
+    </tbody>
+  </table>
+
+  <footer>
+    Built for the <a href="https://toddlerbot.github.io/">ToddlerBot</a> platform.
+    Adjust session pacing to your students — the reward-shaping experiment is the heart of the class; protect its time.
+  </footer>
+
+</div>
+</body>
+</html>

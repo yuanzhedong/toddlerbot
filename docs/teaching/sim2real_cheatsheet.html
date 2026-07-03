@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sim-to-Real Loop — One-Page Cheat Sheet (ToddlerBot)</title>
+<style>
+  :root { --ink:#1a1f29; --mut:#5b6472; --acc:#2f6fed; --grn:#2f9e57; --pur:#6a4cf0;
+          --line:#c9d2e0; --soft:#eef3fc; --warn:#fff7e6; --good:#eefaf0; }
+  * { box-sizing: border-box; }
+  html, body { margin:0; }
+  body { font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+         color:var(--ink); font-size:10.5px; line-height:1.35; padding:14px 16px; }
+  h1 { font-size:17px; margin:0 0 2px; }
+  .sub { color:var(--mut); font-size:10.5px; margin:0 0 8px; }
+  .rule { background:var(--acc); color:#fff; font-weight:700; border-radius:6px;
+          padding:5px 10px; font-size:11px; display:inline-block; }
+  h2 { font-size:11.5px; margin:0 0 5px; text-transform:uppercase; letter-spacing:.04em;
+       color:var(--acc); border-bottom:1.5px solid var(--line); padding-bottom:3px; }
+  .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:9px; }
+  .card { border:1px solid var(--line); border-radius:8px; padding:8px 10px; }
+  ol, ul { margin:3px 0 0; padding-left:16px; }
+  li { margin:2px 0; }
+  code { font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:9.5px;
+         background:#eef1f6; border-radius:3px; padding:1px 4px; }
+  pre { background:#1f2430; color:#e6e9f0; border-radius:6px; padding:6px 8px; margin:4px 0 0;
+        font-size:9px; line-height:1.4; overflow:hidden; white-space:pre-wrap; }
+  pre code { background:none; color:inherit; padding:0; font-size:9px; }
+  table { border-collapse:collapse; width:100%; margin-top:6px; font-size:9.8px; }
+  th, td { border:1px solid var(--line); padding:4px 6px; text-align:left; vertical-align:top; }
+  th { background:var(--soft); }
+  .knob { border-left:3px solid var(--acc); padding:2px 0 2px 8px; margin:6px 0; }
+  .knob.b { border-color:var(--grn); }
+  .tag { font-weight:700; }
+  .step-n { display:inline-block; min-width:14px; font-weight:700; color:var(--acc); }
+  figure { margin:6px 0 0; text-align:center; }
+  figure svg { max-width:100%; height:auto; }
+  .foot { color:var(--mut); font-size:8.8px; margin-top:8px; border-top:1px solid var(--line); padding-top:5px; }
+  @page { size:A4 portrait; margin:10mm; }
+  @media print {
+    body { padding:0; font-size:10px; }
+    .rule, th, .card { -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+    a { color:inherit; text-decoration:none; }
+  }
+</style>
+</head>
+<body>
+
+<h1>Sim-to-Real Loop &mdash; Cheat Sheet</h1>
+<p class="sub">ToddlerBot walk RL &middot; from a trained policy to a robot that actually walks.
+<span class="rule">Golden rule: measure the gap before you change anything.</span></p>
+
+<div class="grid2">
+  <div class="card">
+    <h2>Deploy: trained run &#8594; robot</h2>
+    <ol>
+      <li><span class="tag">Output.</span> Training writes <code>results/&lt;run&gt;/model_best.onnx</code> &mdash; that file <em>is</em> the 84&#8594;12 policy.</li>
+      <li><span class="tag">Re-test the ONNX in sim</span> (catch export bugs first):
+        <pre><code>run_policy.py --policy walk --sim mujoco --vis view</code></pre></li>
+      <li><span class="tag">Prep hardware:</span> zero-calibrate motors (<code>calibrate_zero.py</code>), confirm a clean <code>--policy stand</code>, use the safety stand.</li>
+      <li><span class="tag">Deploy + record:</span>
+        <pre><code>run_policy.py --policy walk --sim real --record</code></pre>
+        Inputs now = IMU + encoders; outputs drive motors @50&nbsp;Hz.</li>
+    </ol>
+  </div>
+
+  <div class="card">
+    <h2>The loop</h2>
+    <figure>
+      <svg viewBox="0 0 640 150" role="img" aria-label="Sim-to-real iteration loop">
+        <defs><marker id="a" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto">
+          <path d="M0,0 L7,3 L0,6 Z" fill="#5b6472"/></marker></defs>
+        <g font-size="12" font-weight="700" fill="#1a1f29" text-anchor="middle">
+          <rect x="8"   y="18" width="130" height="46" rx="8" fill="#eef3fc" stroke="#2f6fed" stroke-width="2"/>
+          <text x="73"  y="38">1. Deploy</text><text x="73" y="54" font-size="9" font-weight="400" fill="#5b6472">--sim real</text>
+          <rect x="170" y="18" width="130" height="46" rx="8" fill="#f0eafd" stroke="#6a4cf0" stroke-width="2"/>
+          <text x="235" y="38">2. Measure</text><text x="235" y="54" font-size="9" font-weight="400" fill="#5b6472">sim2real_eval</text>
+          <rect x="332" y="18" width="130" height="46" rx="8" fill="#fff7e6" stroke="#e0a92e" stroke-width="2"/>
+          <text x="397" y="38">3. Fix</text><text x="397" y="54" font-size="9" font-weight="400" fill="#5b6472">calib / sysID / DR</text>
+          <rect x="494" y="18" width="130" height="46" rx="8" fill="#eefaf0" stroke="#2f9e57" stroke-width="2"/>
+          <text x="559" y="38">4. Retrain</text><text x="559" y="54" font-size="9" font-weight="400" fill="#5b6472">if needed</text>
+        </g>
+        <g stroke="#5b6472" stroke-width="2" marker-end="url(#a)">
+          <line x1="138" y1="41" x2="166" y2="41"/>
+          <line x1="300" y1="41" x2="328" y2="41"/>
+          <line x1="462" y1="41" x2="490" y2="41"/>
+          <path d="M559 64 L559 108 L73 108 L73 66" fill="none" stroke-dasharray="6 5"/>
+        </g>
+        <text x="316" y="102" text-anchor="middle" font-size="10.5" font-weight="700" fill="#5b6472">repeat &mdash; the gap shrinks each loop</text>
+        <text x="316" y="134" text-anchor="middle" font-size="9.5" fill="#5b6472">do the no-retrain fixes (steps 1&#8211;3) before burning GPU hours on step 4</text>
+      </svg>
+    </figure>
+  </div>
+</div>
+
+<div class="card" style="margin-top:9px;">
+  <h2>Diagnose the gap &mdash; overlay real vs sim with <code>sim2real_eval.py</code></h2>
+  <table>
+    <thead><tr><th style="width:34%">What you see in the overlay</th><th style="width:30%">Likely cause</th><th style="width:36%">Fix (cheapest first)</th></tr></thead>
+    <tbody>
+      <tr><td>Constant offset; robot leans one way</td><td>Motor <b>zero / calibration</b> off</td><td><code>calibrate_zero.py</code> &mdash; no retrain</td></tr>
+      <tr><td>Real motors lag / undershoot the command</td><td><b>Actuator model</b> too strong or fast in sim</td><td>System ID (bench fixture, pre-done) &rarr; use a fitted model</td></tr>
+      <tr><td>Right shape, shifted in time</td><td><b>Latency</b> mismatch</td><td>tune <code>n_steps_delay</code></td></tr>
+      <tr><td>Tips over under load / when moving</td><td><b>Mass / friction / inertia</b> wrong</td><td>measure (<code>test_mass.py</code>), fix MJCF, or widen DR</td></tr>
+      <tr><td>Every metric matches but still unstable</td><td>Policy <b>overfit</b> to sim quirks</td><td>widen domain randomization + retrain</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="grid2">
+  <div class="card">
+    <h2>Two knobs &mdash; always name which one</h2>
+    <div class="knob"><span class="tag" style="color:var(--acc)">Make the sim match the robot</span> (fixes <b>bias</b>).
+      Calibration (per robot) + system ID. <code>run_sysID.py</code> (Optuna) fits motor torque / damping / friction on a <b>single-motor bench rig</b>, per motor type, once. <em>No policy retrain.</em></div>
+    <div class="knob b"><span class="tag" style="color:var(--grn)">Make the policy not care</span> (fixes <b>variance</b>).
+      Widen <code>DomainRandConfig</code> around the identified values, then retrain:
+      <pre><code>add_push = True
+friction_range = [0.3, 1.1]
+kp_range = [0.8, 1.2]</code></pre></div>
+    <div style="font-size:9.5px;color:var(--mut)">You almost always need <b>both</b>. This loop <em>is</em> the research.</div>
+  </div>
+
+  <div class="card">
+    <h2>Command &amp; tool quick-ref</h2>
+    <table>
+      <tbody>
+        <tr><td><code>run_policy.py --sim mujoco</code></td><td>test the policy in simulation</td></tr>
+        <tr><td><code>run_policy.py --sim real --record</code></td><td>run on the robot, log the rollout</td></tr>
+        <tr><td><code>tools/calibrate_zero.py</code></td><td>zero-calibrate the motors</td></tr>
+        <tr><td><code>tools/sim2real_eval.py</code></td><td>overlay sim vs real (pos/vel/torque/IMU)</td></tr>
+        <tr><td><code>tools/run_sysID.py</code></td><td>fit sim motor model to real data</td></tr>
+        <tr><td><code>DomainRandConfig</code> in <code>walk.gin</code></td><td>widen randomization, then retrain</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<p class="foot">ToddlerBot high-school RL curriculum &middot; companion to the full guide (<code>rl_highschool.html</code>).
+Order of operations: <b>calibrate &#8594; system-ID the sim &#8594; widen DR + retrain &#8594; redeploy.</b> Print at 100% scale (A4/Letter, portrait).</p>
+
+</body>
+</html>

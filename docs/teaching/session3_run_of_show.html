@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Session 3 Run-of-Show — Sim-to-Real (Instructor)</title>
+<style>
+  :root {
+    --ink:#1f2430; --muted:#5b6472; --accent:#2f6fed; --accent-soft:#eaf1ff;
+    --line:#e2e6ee; --card:#f7f9fc; --warn-bg:#fff7e6; --warn-line:#f0c36d;
+    --good-bg:#eefaf0; --good-line:#8fd6a0; --bad-bg:#fdECEC; --bad-line:#e6a3a3;
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; color:var(--ink); line-height:1.5; }
+  .wrap { max-width:960px; margin:0 auto; padding:28px 24px 70px; }
+  header.hero { background:linear-gradient(135deg,#2f6fed 0%,#6a4cf0 100%); color:#fff; padding:32px 24px; text-align:center; }
+  header.hero h1 { margin:0 0 6px; font-size:1.6rem; }
+  header.hero p { margin:0; opacity:.92; }
+  h2 { margin:28px 0 10px; font-size:1.28rem; border-bottom:2px solid var(--line); padding-bottom:6px; }
+  h3 { margin:18px 0 6px; font-size:1.02rem; color:var(--accent); }
+  p { margin:8px 0; }
+  a { color:var(--accent); }
+  code { background:#eef1f6; border-radius:5px; padding:2px 6px; font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:.87em; }
+  table { border-collapse:collapse; width:100%; margin:10px 0; font-size:.9rem; }
+  th, td { border:1px solid var(--line); padding:8px 10px; text-align:left; vertical-align:top; }
+  th { background:var(--accent-soft); }
+  td.t { white-space:nowrap; font-weight:700; font-variant-numeric:tabular-nums; width:74px; }
+  td.watch { background:var(--warn-bg); }
+  .callout { border-radius:10px; padding:12px 16px; margin:14px 0; border:1px solid var(--line); background:var(--card); }
+  .callout.warn { background:var(--warn-bg); border-color:var(--warn-line); }
+  .callout.good { background:var(--good-bg); border-color:var(--good-line); }
+  .callout.bad { background:var(--bad-bg); border-color:var(--bad-line); }
+  ul { margin:6px 0; padding-left:20px; } li { margin:4px 0; }
+  .chip { display:inline-block; border-radius:999px; font-size:.78rem; font-weight:700; padding:2px 10px; }
+  .chip.h1 { background:var(--accent-soft); color:#1c3f8f; }
+  .glance td.t { color:var(--accent); }
+  .gotcha { border:1px solid var(--bad-line); border-radius:9px; padding:2px 14px; margin:12px 0; background:var(--bad-bg); }
+  .gotcha h3 { color:#b23c3c; margin:12px 0 4px; }
+  footer { color:var(--muted); font-size:.85rem; margin-top:40px; border-top:1px solid var(--line); padding-top:14px; }
+  @media print {
+    header.hero { background:#2f6fed !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+    th,td.watch,.callout,.gotcha,.chip { -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+    table,.callout,.gotcha { break-inside:avoid; } h2 { break-after:avoid; }
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <h1>Session 3 Run-of-Show — Sim-to-Real</h1>
+  <p>Instructor minute-by-minute · 3 hours · one robot + one 3080 per group · retrains on the RTX 6000s</p>
+</header>
+
+<div class="wrap">
+
+  <div class="callout">
+    <strong>The one thing to protect:</strong> every group must complete <em>one full loop</em> —
+    deploy on the real robot &#8594; measure the gap &#8594; apply a fix &#8594; redeploy. Everything else is optional.
+    If you're behind, cut the second iteration, not the measurement.
+  </div>
+
+  <h2>Before students arrive (T&#8722;45 to T&#8722;0)</h2>
+  <ul>
+    <li><strong>Robots:</strong> charged, zero-calibrated the night before, and pre-loaded with the <strong>gold walk checkpoint</strong>. Power each one and confirm it holds a stand <em>yourself</em> — don't discover a dead motor in front of students.</li>
+    <li><strong>Sim baseline logged:</strong> pre-record a <em>sim</em> rollout of the gold policy for each robot config and note the file path — groups need it to overlay against real (see gotcha below). This is the #1 thing people forget.</li>
+    <li><strong>Benches:</strong> safety stand + harness per bench, kill switch tested, floor zone taped off, cables dressed.</li>
+    <li><strong>GPUs:</strong> 6000 retrain queue empty and ready; have 1&#8211;2 <strong>pre-trained domain-randomization-widened variants</strong> on disk as drop-in fixes so nobody waits on a from-scratch run.</li>
+    <li><strong>Paper:</strong> printed <a href="sim2real_cheatsheet.html">cheat sheet</a> + <a href="sim2real_lab_sheet.html">lab sheet</a> per group. One backup robot on standby.</li>
+  </ul>
+
+  <h2>At a glance</h2>
+  <table class="glance">
+    <thead><tr><th>Time</th><th>Block</th><th>Core outcome</th></tr></thead>
+    <tbody>
+      <tr><td class="t">0:00&#8211;1:00</td><td>Hour 1 — Safety, calibrate, first deploy</td><td>Every robot stands; every group has a <em>recorded real rollout</em>.</td></tr>
+      <tr><td class="t">1:00&#8211;2:00</td><td>Hour 2 — Diagnose &amp; fix</td><td>Each group names its gap and launches one fix.</td></tr>
+      <tr><td class="t">2:00&#8211;3:00</td><td>Hour 3 — Redeploy, demo, wrap</td><td>Before/after comparison + 2-min group demos.</td></tr>
+    </tbody>
+  </table>
+
+  <h2><span class="chip h1">Hour 1</span> &nbsp;Safety, calibrate, first contact &nbsp;<span style="color:var(--muted)">(0:00–1:00)</span></h2>
+  <table>
+    <thead><tr><th>Time</th><th>You do</th><th>Watch for / gotcha</th></tr></thead>
+    <tbody>
+      <tr><td class="t">0:00<br>0:10</td><td>Welcome + payoff. "Last time it walked in sim — today, the real robot." Show a sim clip, then point at the hardware.</td><td class="watch">Keep it to 10 min; the energy is high, don't lecture.</td></tr>
+      <tr><td class="t">0:10<br>0:22</td><td><strong>Safety briefing</strong>, demonstrated on one robot: harness, kill switch, clear zone. Students <strong>initial the lab sheet</strong> before any motor powers on.</td><td class="watch">No initials = no power. Say the "never grab a falling robot" rule out loud and have them repeat it.</td></tr>
+      <tr><td class="t">0:22<br>0:40</td><td><strong>Calibrate + stand.</strong> Groups run <code>calibrate_zero.py</code>, then <code>run_policy.py --policy stand --sim real</code>.</td><td class="watch">Expect 1&#8211;2 robots that won't stand — see the gotcha playbook. Float the room; this is where you're needed.</td></tr>
+      <tr><td class="t">0:40<br>0:50</td><td><strong>Sim re-test.</strong> Same policy in <code>--sim mujoco</code> so they trust the brain before hardware.</td><td class="watch">If it walks in sim but not real, that's the whole lesson — don't "fix" it now, that's Hour 2.</td></tr>
+      <tr><td class="t">0:50<br>1:00</td><td><strong>Predict, then deploy.</strong> Groups write their prediction, then <code>--policy walk --sim real --record</code>.</td><td class="watch">Robots will lean/drift/fall — that is success for Hour 1. Make sure every group actually <strong>saved a recording</strong>.</td></tr>
+    </tbody>
+  </table>
+
+  <h2><span class="chip h1">Hour 2</span> &nbsp;Diagnose the gap &nbsp;<span style="color:var(--muted)">(1:00–2:00)</span></h2>
+  <table>
+    <thead><tr><th>Time</th><th>You do</th><th>Watch for / gotcha</th></tr></thead>
+    <tbody>
+      <tr><td class="t">1:00<br>1:30</td><td><strong>Overlay sim vs real</strong> with <code>sim2real_eval.py</code>. Groups fill the diagnose table on the lab sheet.</td><td class="watch"><strong>Biggest time sink of the day.</strong> Data-path wrangling stalls everyone — hand out the exact sim-log path you pre-recorded. Float constantly.</td></tr>
+      <tr><td class="t">1:30<br>1:40</td><td><strong>Classify + pick a knob.</strong> Each group commits: match-the-sim, or make-the-policy-robust.</td><td class="watch">Groups over-reach to "retrain everything." Push them to the <em>cheapest</em> fix that matches their overlay (usually calibration).</td></tr>
+      <tr><td class="t">1:40<br>2:00</td><td><strong>Apply the fix.</strong> Calibration/gain fixes redeploy now. Actuator-model &#8594; kick off <code>run_sysID.py</code>. Full retrains &#8594; hand to you for the 6000s.</td><td class="watch">4 GPUs, more groups — triage. Most fixes need <em>no</em> retrain; only queue the ones that truly do, or drop in your pre-trained DR variant.</td></tr>
+    </tbody>
+  </table>
+
+  <h2><span class="chip h1">Hour 3</span> &nbsp;Close the loop, demo, wrap &nbsp;<span style="color:var(--muted)">(2:00–3:00)</span></h2>
+  <table>
+    <thead><tr><th>Time</th><th>You do</th><th>Watch for / gotcha</th></tr></thead>
+    <tbody>
+      <tr><td class="t">2:00<br>2:25</td><td><strong>Redeploy with the fix</strong>, record, and overlay <strong>before vs after</strong>. Retrained groups load their 6000 variant.</td><td class="watch">Have retrained checkpoints copied to group machines <em>ahead</em> of 2:00 so there's no transfer scramble.</td></tr>
+      <tr><td class="t">2:25<br>2:35</td><td><strong>Second iteration</strong> for groups that are moving fast.</td><td class="watch">Optional. First to cut if you're behind.</td></tr>
+      <tr><td class="t">2:35<br>2:50</td><td><strong>Group demos</strong>, 2 min each: before/after video + overlay, "which knob and why."</td><td class="watch">Hard-stop 2 min per group. Celebrate a good <em>diagnosis</em> as much as a good walk.</td></tr>
+      <tr><td class="t">2:50<br>3:00</td><td><strong>Wrap:</strong> two-knobs model, "this loop <em>is</em> the research," nobody nails it first try. Tease push-recovery / multi-skill.</td><td class="watch">End on the honest note, not on the group that walked best.</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Gotcha playbook</h2>
+
+  <div class="gotcha">
+    <h3>Half the robots won't stand</h3>
+    <ul>
+      <li>Fastest triage, in order: (1) confirm the <strong>kill switch is released</strong>; (2) re-run <code>calibrate_zero.py</code>; (3) reseat the suspect leg's cable; (4) check one motor with <code>examples/test_dynamixel.py</code>.</li>
+      <li>If it's not up in ~3 min, <strong>swap to the backup robot</strong> or <strong>pair the group</strong> with a neighbor — don't let one dead servo eat the session.</li>
+      <li>A down-robot group can still do <em>all</em> the science on a partner's recording — the analysis is the point.</li>
+    </ul>
+  </div>
+
+  <div class="gotcha">
+    <h3>The gold policy still falls on the real robot</h3>
+    <ul>
+      <li>90% of the time it's <strong>calibration</strong> — re-zero and confirm a clean stand first. A few degrees of ankle offset topples a walk.</li>
+      <li>Then reduce difficulty: command a <strong>slower walk</strong> (smaller command), check <strong>harness height</strong> (too low = it can't load its legs; too high = it hangs).</li>
+      <li>Confirm the robot is running its <strong>correct config</strong> and the intended checkpoint, not a neighbor's.</li>
+      <li>Reframe for the group: a policy that falls but whose overlay <em>explains why</em> is a full success today.</li>
+    </ul>
+  </div>
+
+  <div class="gotcha">
+    <h3><code>sim2real_eval.py</code> won't run / "nothing to compare against"</h3>
+    <ul>
+      <li>Root cause is almost always a <strong>missing sim baseline</strong>. This is why you pre-recorded a sim rollout per config — hand out that exact path.</li>
+      <li>Check the <strong>real recording actually saved</strong> from Hour 1 (the <code>--record</code> flag and output dir). No file = redeploy a quick 10-second rollout.</li>
+      <li>Keep a <strong>known-good example pair</strong> (sim + real logs) on hand so a blocked group can still practice reading an overlay while you debug theirs.</li>
+    </ul>
+  </div>
+
+  <div class="gotcha">
+    <h3>Retrain queue jammed (only 4 GPUs)</h3>
+    <ul>
+      <li>Most fixes are calibration/gain = <strong>no retrain</strong>. Actively steer groups there; only queue genuine domain-rand cases.</li>
+      <li>Serve your <strong>pre-trained DR-widened variants</strong> as instant drop-ins instead of from-scratch runs.</li>
+      <li>Batch identical configs into one run; time-box any live retrain to what finishes before 2:00.</li>
+    </ul>
+  </div>
+
+  <div class="gotcha">
+    <h3>Running behind</h3>
+    <ul>
+      <li>Cut, in order: the 2nd iteration (2:25) &#8594; the sim re-test (0:40, if a group already trusts it) &#8594; trim demos to 90&nbsp;s.</li>
+      <li>Never cut: the first real deploy+record, and the overlay. That's the loop.</li>
+    </ul>
+  </div>
+
+  <h2>Staffing &amp; definition of done</h2>
+  <div class="callout good">
+    <strong>Two instructors if possible:</strong> a <em>floor</em> lead (safety, robots, calibration) and a <em>GPU</em> lead
+    (owns the 6000 retrain queue and copies checkpoints to group machines). Solo? Recruit one confident student as your
+    "GPU operator."
+  </div>
+  <p><strong>Done when</strong> every group has: a recorded before/after on the real robot, a filled diagnose table, and can say in one sentence which knob they turned and why. A perfect walk is a bonus, not the bar.</p>
+
+  <footer>
+    Instructor companion to the ToddlerBot high-school RL curriculum (Session&nbsp;3). Pairs with the student
+    <a href="sim2real_lab_sheet.html">lab sheet</a> and <a href="sim2real_cheatsheet.html">cheat sheet</a>.
+  </footer>
+
+</div>
+</body>
+</html>

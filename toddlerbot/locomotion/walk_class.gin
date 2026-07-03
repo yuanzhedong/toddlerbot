@@ -1,0 +1,24 @@
+# walk_class.gin — scaled-down walk training for classroom use.
+#
+# Layer this ON TOP of walk.gin so it only overrides the training budget and
+# leaves all the rewards/observations intact. gin applies files left-to-right,
+# so later bindings win:
+#
+#   python toddlerbot/locomotion/train_mjx.py --env walk --gin-file "walk walk_class"
+#
+# Goal: a run that VISIBLY improves in ~10-15 min on a group's RTX 3080, so students see
+# the reward curve climb. It will NOT fully converge — that's expected. Compare
+# against the pre-trained "gold" checkpoint for what good looks like.
+
+# Training budget (defaults in ppo_config.py are 1e9 timesteps, 4096 envs, 100 evals)
+PPOConfig.num_timesteps = 30_000_000   # ~3% of the full run; enough to see learning
+PPOConfig.num_envs = 2048              # halve parallel robots to fit smaller GPUs
+PPOConfig.num_evals = 30               # ~30 points on the reward curve (1 per ~1M steps)
+
+# Tuning notes for the instructor:
+# - On a 10 GB RTX 3080, 2048 envs should fit; drop num_envs to 1024 if you hit out-of-memory.
+# - On the RTX 6000 Blackwells you can raise num_envs back to 4096 and num_timesteps toward the
+#   full 1e9 for the "gold" checkpoints or a group's longer follow-up run.
+# - If a run finishes too fast / too slow, scale num_timesteps up or down.
+# - num_evals just controls how many points are logged to the curve; more = smoother
+#   plot but slightly more overhead.

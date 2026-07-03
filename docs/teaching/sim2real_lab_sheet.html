@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Session 3 Lab Sheet — Sim-to-Real (ToddlerBot)</title>
+<style>
+  :root {
+    --ink: #1f2430; --muted: #5b6472; --accent: #2f6fed; --accent-soft: #eaf1ff;
+    --line: #e2e6ee; --card: #f7f9fc; --warn-bg: #fff7e6; --warn-line: #f0c36d;
+    --good-bg: #eefaf0; --good-line: #8fd6a0;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; color: var(--ink); line-height: 1.5; }
+  .wrap { max-width: 940px; margin: 0 auto; padding: 30px 24px 70px; }
+  header.hero { background: linear-gradient(135deg, #2f6fed 0%, #6a4cf0 100%); color: #fff; padding: 34px 24px; text-align: center; }
+  header.hero h1 { margin: 0 0 6px; font-size: 1.65rem; }
+  header.hero p { margin: 0; opacity: .92; }
+  h2 { margin: 30px 0 10px; font-size: 1.3rem; border-bottom: 2px solid var(--line); padding-bottom: 6px; }
+  .step-tag { display:inline-block; background:var(--accent); color:#fff; border-radius:6px; font-size:.8rem; font-weight:700; padding:1px 9px; margin-right:8px; vertical-align:middle; }
+  p { margin: 9px 0; }
+  a { color: var(--accent); }
+  code { background: #eef1f6; border-radius: 5px; padding: 2px 6px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .88em; }
+  table { border-collapse: collapse; width: 100%; margin: 12px 0; font-size: .92rem; }
+  th, td { border: 1px solid var(--line); padding: 9px 10px; text-align: left; vertical-align: top; }
+  th { background: var(--accent-soft); }
+  .fill { background: #fffdf5; }
+  .box { border: 1px dashed #b9c2d0; border-radius: 8px; min-height: 56px; padding: 8px 10px; background: #fffdf5; margin: 6px 0 14px; }
+  .field-label { font-weight: 600; font-size: .95rem; }
+  .callout { border-radius: 10px; padding: 12px 16px; margin: 14px 0; border: 1px solid var(--line); background: var(--card); }
+  .callout.warn { background: var(--warn-bg); border-color: var(--warn-line); }
+  .callout.good { background: var(--good-bg); border-color: var(--good-line); }
+  .chk { list-style: none; padding-left: 0; margin: 8px 0; }
+  .chk li { margin: 7px 0; }
+  .chk li::before { content: "\2610"; font-size: 1.25rem; margin-right: 9px; vertical-align: -2px; }
+  .cmd { background:#1f2430; color:#e6e9f0; border-radius:8px; padding:10px 12px; font-size:.82rem; line-height:1.7; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+  .cmd .c { color:#8fd6a0; } .cmd .n { color:#9bb4e8; }
+  details { margin: 10px 0; border: 1px solid var(--good-line); background: var(--good-bg); border-radius: 8px; padding: 6px 14px; }
+  summary { cursor: pointer; font-weight: 700; color: #1c7a35; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .knob { font-weight:700; border-radius:6px; padding:1px 8px; font-size:.85rem; }
+  .knob.a { background:var(--accent-soft); color:#1c3f8f; }
+  .knob.b { background:var(--good-bg); color:#1c7a35; }
+  footer { color: var(--muted); font-size: .85rem; margin-top: 40px; border-top: 1px solid var(--line); padding-top: 14px; }
+  @media (max-width: 640px) { .grid2 { grid-template-columns: 1fr; } }
+  @media print {
+    header.hero { background:#2f6fed !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+    th, details, .step-tag, .callout { -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+    .cmd { background:#1f2430 !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+    h2 { break-after: avoid; } table, .box { break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <h1>Session 3 Lab Sheet — Sim-to-Real</h1>
+  <p>Get your trained policy to walk on the <em>real</em> ToddlerBot — then measure and close the gap.</p>
+</header>
+
+<div class="wrap">
+
+  <p><strong>Names:</strong> ______________________________ &nbsp; <strong>Group:</strong> ______ &nbsp; <strong>Robot #:</strong> ______ &nbsp; <strong>Date:</strong> __________</p>
+
+  <div class="callout warn">
+    <strong>Safety — initial each box before powering a motor.</strong>
+    <ul class="chk">
+      <li>Robot is on the <strong>safety stand / harness</strong> for first runs. &nbsp; <em>initials ____</em></li>
+      <li>My <strong>kill switch</strong> is within reach and I've tested it. &nbsp; <em>initials ____</em></li>
+      <li>The bench zone is <strong>clear</strong> of hands, cables, and people. &nbsp; <em>initials ____</em></li>
+      <li>I will <strong>never grab a falling robot</strong> — I let it fall and hit stop. &nbsp; <em>initials ____</em></li>
+    </ul>
+  </div>
+
+  <p class="field-label">Bench commands (fill in your run name / policy where needed):</p>
+  <div class="cmd">
+    <span class="c"># calibrate motor zeros, then confirm a clean stand</span><br>
+    python toddlerbot/tools/calibrate_zero.py<br>
+    python toddlerbot/policies/run_policy.py --policy stand --sim real<br>
+    <span class="c"># sanity-check the policy in sim BEFORE hardware</span><br>
+    python toddlerbot/policies/run_policy.py --policy walk --sim mujoco --vis view<br>
+    <span class="c"># deploy on the real robot and record the rollout</span><br>
+    python toddlerbot/policies/run_policy.py --policy walk --sim real --record<br>
+    <span class="c"># overlay real vs sim to see the gap</span><br>
+    python toddlerbot/tools/sim2real_eval.py <span class="n">&lt;sim_data&gt; &lt;real_data&gt;</span>
+  </div>
+
+  <h2><span class="step-tag">Part 1</span>Pre-flight</h2>
+  <ul class="chk">
+    <li>Motors <strong>zero-calibrated</strong>.</li>
+    <li>Robot holds a <strong>clean stand</strong> (<code>--policy stand --sim real</code>). If not, stop and fix before walking.</li>
+    <li>Policy <strong>re-tested in sim</strong> (<code>--sim mujoco</code>) and looks good.</li>
+  </ul>
+
+  <h2><span class="step-tag">Part 2</span>Predict, then deploy</h2>
+  <p class="field-label">Before you press go: what do you predict the robot will do on its first real walk? Why?</p>
+  <div class="box"></div>
+  <p class="field-label">Now deploy (<code>--sim real --record</code>). What actually happened? (leaning? drifting? tip-toe? fell? which direction?)</p>
+  <div class="box" style="min-height:80px;"></div>
+  <p class="field-label">Did it match your prediction? What surprised you?</p>
+  <div class="box"></div>
+
+  <h2><span class="step-tag">Part 3</span>Diagnose the gap</h2>
+  <p>Overlay your real rollout against sim with <code>sim2real_eval.py</code>. Look at the motor position / velocity / torque and IMU plots, and fill this in:</p>
+  <table>
+    <thead><tr>
+      <th style="width:38%">What did the overlay show? (where do sim &amp; real split?)</th>
+      <th class="fill" style="width:32%">Our best guess at the cause</th>
+      <th class="fill" style="width:30%">Fix we could try</th>
+    </tr></thead>
+    <tbody>
+      <tr><td class="fill" style="height:52px">&nbsp;</td><td class="fill">&nbsp;</td><td class="fill">&nbsp;</td></tr>
+      <tr><td class="fill" style="height:52px">&nbsp;</td><td class="fill">&nbsp;</td><td class="fill">&nbsp;</td></tr>
+    </tbody>
+  </table>
+  <details>
+    <summary>Stuck? Reveal the symptom &rarr; cause guide</summary>
+    <table>
+      <thead><tr><th>What you see</th><th>Likely cause</th><th>Cheapest fix</th></tr></thead>
+      <tbody>
+        <tr><td>Constant offset; robot leans one way</td><td>Motor zero / calibration off</td><td><code>calibrate_zero.py</code> (no retrain)</td></tr>
+        <tr><td>Real motors lag / undershoot the command</td><td>Actuator model too strong/fast in sim</td><td>System ID (bench fixture, done ahead of time)</td></tr>
+        <tr><td>Right shape, shifted in time</td><td>Latency mismatch</td><td>tune <code>n_steps_delay</code></td></tr>
+        <tr><td>Tips over under load / when moving</td><td>Mass / friction / inertia wrong</td><td>measure mass, fix model, or widen DR</td></tr>
+        <tr><td>Everything matches but still unstable</td><td>Policy overfit to sim quirks</td><td>widen domain randomization + retrain</td></tr>
+      </tbody>
+    </table>
+  </details>
+
+  <h2><span class="step-tag">Part 4</span>Pick ONE fix — which knob are you turning?</h2>
+  <p>Circle one:&nbsp;&nbsp; <span class="knob a">Make the sim match the robot</span> (calibration / system ID) &nbsp;&nbsp; <span class="knob b">Make the policy robust</span> (domain randomization + retrain)</p>
+  <p class="field-label">The exact change we're making (command or config line):</p>
+  <div class="box"></div>
+  <p class="field-label">Why this one first? (hint: cheapest fix that matches your diagnosis)</p>
+  <div class="box"></div>
+  <p style="font-size:.9rem;color:var(--muted)">If your fix needs a full retrain, hand the config to the instructor for the 6000 GPUs and keep analyzing while it runs.</p>
+
+  <h2><span class="step-tag">Part 5</span>Redeploy &amp; compare</h2>
+  <div class="grid2">
+    <div>
+      <p class="field-label">Attempt 1 (before the fix) — describe / measure:</p>
+      <div class="box" style="min-height:100px;"></div>
+    </div>
+    <div>
+      <p class="field-label">Attempt 2 (after the fix) — describe / measure:</p>
+      <div class="box" style="min-height:100px;"></div>
+    </div>
+  </div>
+  <p class="field-label">Did the gap shrink? What in the overlay changed?</p>
+  <div class="box"></div>
+
+  <h2><span class="step-tag">Part 6</span>Reflect</h2>
+  <p class="field-label">What is <em>still</em> wrong, and which knob would you turn next?</p>
+  <div class="box"></div>
+  <p class="field-label">One sentence for your demo: "We turned ___ knob because the overlay showed ___."</p>
+  <div class="box"></div>
+
+  <div class="callout good">
+    <strong>Success is not a perfect walk.</strong> Success is: the robot takes real steps <em>and</em> you can point
+    to the specific gap you measured and closed. Nobody nails sim-to-real on the first try — that's the whole point.
+  </div>
+
+  <footer>
+    Companion to the ToddlerBot high-school RL curriculum (Session&nbsp;3). Keep the
+    <a href="sim2real_cheatsheet.html">one-page cheat sheet</a> next to you at the bench.
+  </footer>
+
+</div>
+</body>
+</html>

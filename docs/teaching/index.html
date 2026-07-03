@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Teaching RL with ToddlerBot — Course Materials</title>
+<style>
+  :root {
+    --ink:#1f2430; --muted:#5b6472; --accent:#2f6fed; --accent-soft:#eaf1ff;
+    --line:#e2e6ee; --card:#f7f9fc; --good-bg:#eefaf0; --good-line:#8fd6a0;
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; color:var(--ink); line-height:1.55; background:#fbfcfe; }
+  .wrap { max-width:900px; margin:0 auto; padding:36px 24px 80px; }
+  header.hero { background:linear-gradient(135deg,#2f6fed 0%,#6a4cf0 100%); color:#fff; padding:44px 24px; text-align:center; }
+  header.hero h1 { margin:0 0 8px; font-size:1.9rem; }
+  header.hero p { margin:0; opacity:.92; font-size:1.05rem; }
+  .badges { margin-top:16px; display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
+  .badge { background:rgba(255,255,255,.18); border:1px solid rgba(255,255,255,.35); border-radius:999px; padding:5px 14px; font-size:.85rem; }
+  h2 { margin:34px 0 6px; font-size:1.2rem; }
+  h2 .k { font-size:.78rem; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); font-weight:700; }
+  p.lead { color:var(--muted); margin:2px 0 14px; }
+  a { color:var(--accent); text-decoration:none; }
+  .card { display:flex; gap:14px; align-items:flex-start; border:1px solid var(--line); border-radius:12px; padding:14px 16px; margin:10px 0; background:#fff; transition:border-color .15s, box-shadow .15s; }
+  .card:hover { border-color:var(--accent); box-shadow:0 2px 10px rgba(47,111,237,.08); }
+  .card .ico { font-size:1.5rem; line-height:1.2; }
+  .card .body { flex:1; }
+  .card .title { font-weight:700; font-size:1.02rem; }
+  .card .title a::after { content:" \2197"; color:var(--muted); font-size:.85em; }
+  .card .desc { color:var(--muted); font-size:.9rem; margin-top:2px; }
+  .pill { display:inline-block; border-radius:999px; font-size:.72rem; font-weight:700; padding:1px 9px; margin-left:6px; vertical-align:2px; }
+  .pill.stu { background:var(--good-bg); color:#1c7a35; border:1px solid var(--good-line); }
+  .pill.ins { background:var(--accent-soft); color:#1c3f8f; border:1px solid #b9ccf5; }
+  .pill.print { background:#f0eafd; color:#5b3fc0; border:1px solid #cdbcf5; }
+  .start { border:2px solid var(--accent); background:linear-gradient(180deg,#f4f8ff,#fff); }
+  .flow { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:14px 18px; margin:18px 0; font-size:.92rem; color:var(--muted); }
+  .flow b { color:var(--ink); }
+  code { background:#eef1f6; border-radius:5px; padding:2px 6px; font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:.86em; }
+  footer { color:var(--muted); font-size:.85rem; margin-top:40px; border-top:1px solid var(--line); padding-top:16px; }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <h1>Teaching Reinforcement Learning with ToddlerBot</h1>
+  <p>Course materials — a high-school RL class on a real open-source humanoid</p>
+  <div class="badges">
+    <span class="badge">3 &times; 3-hour sessions</span>
+    <span class="badge">Intro-CS Python</span>
+    <span class="badge">RL · deep learning · sim-to-real</span>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <h2><span class="k">Start here</span></h2>
+  <p class="lead">The full plan. Everything else is a companion to this.</p>
+  <div class="card start">
+    <div class="ico">📘</div>
+    <div class="body">
+      <div class="title"><a href="rl_highschool.html">The Curriculum</a></div>
+      <div class="desc">Full 3-session guide: the RL loop, the neural-network "brain" (84&#8594;12), reward shaping, training, and the complete sim-to-real workflow — with diagrams and embedded demo clips.</div>
+    </div>
+  </div>
+
+  <div class="flow">
+    <b>How the pieces fit:</b> &nbsp; <b>Session 1</b> RL + the brain (in sim) &nbsp;&#8594;&nbsp;
+    <b>Session 2</b> reward shaping + training <span class="pill stu">worksheet</span> &nbsp;&#8594;&nbsp;
+    <b>Session 3</b> sim-to-real on real robots <span class="pill ins">run-of-show</span> <span class="pill stu">lab sheet</span> <span class="pill print">cheat sheet</span>
+  </div>
+
+  <h2><span class="k">Session 2 — reward shaping &amp; training</span></h2>
+  <div class="card">
+    <div class="ico">📝</div>
+    <div class="body">
+      <div class="title"><a href="rl_reward_worksheet.html">Reward Worksheet</a> <span class="pill stu">student</span> <span class="pill print">printable</span></div>
+      <div class="desc">The 10 active reward terms with fill-in blanks ("what it encourages / what breaks at 0"), a prediction section, run commands, and a collapsible instructor answer key.</div>
+    </div>
+  </div>
+
+  <h2><span class="k">Session 3 — sim-to-real</span></h2>
+  <div class="card">
+    <div class="ico">⏱️</div>
+    <div class="body">
+      <div class="title"><a href="session3_run_of_show.html">Run-of-Show</a> <span class="pill ins">instructor</span> <span class="pill print">printable</span></div>
+      <div class="desc">Minute-by-minute timeline with a "watch for" column and a gotcha playbook — robots that won't stand, gold policy still falling, jammed retrain queue, running behind.</div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="ico">🧪</div>
+    <div class="body">
+      <div class="title"><a href="sim2real_lab_sheet.html">Lab Sheet</a> <span class="pill stu">student</span> <span class="pill print">printable</span></div>
+      <div class="desc">Bench worksheet: safety check-off, predict/observe boxes, the diagnose table to fill, pick-a-knob, and before/after comparison.</div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="ico">📄</div>
+    <div class="body">
+      <div class="title"><a href="sim2real_cheatsheet.html">Sim-to-Real Cheat Sheet</a> <span class="pill print">one page</span></div>
+      <div class="desc">The deploy&#8594;measure&#8594;fix&#8594;retrain loop, the diagnose table, and the two-knobs model on a single printable sheet. Keep it at the bench.</div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="ico">🔧</div>
+    <div class="body">
+      <div class="title"><a href="system_id.html">System Identification</a> <span class="pill print">deep dive</span></div>
+      <div class="desc">"Make the simulator honest": chirp data collection, the Optuna parameter search, what it tunes, and a before/after tracking diagram. The counterpart to domain randomization.</div>
+    </div>
+  </div>
+
+  <h2><span class="k">Configs &amp; code</span></h2>
+  <div class="card">
+    <div class="ico">⚙️</div>
+    <div class="body">
+      <div class="title"><a href="../../toddlerbot/locomotion/walk_class.gin"><code>walk_class.gin</code></a></div>
+      <div class="desc">Scaled-down training budget (~30M timesteps, 2048 envs) for classroom runs that visibly improve in ~10&#8211;15&nbsp;min. Use it: <code>--gin-file "walk walk_class"</code>.</div>
+    </div>
+  </div>
+
+  <div class="flow">
+    <b>Viewing tip:</b> for the demo videos and cross-file links to load reliably, serve this folder locally rather than opening files directly —
+    <code>python -m http.server 8000 -d docs/teaching</code>, then open <code>http://localhost:8000/</code>.
+    In VS Code / Antigravity, the <b>Live Preview</b> extension does the same. All pages are print-friendly (Ctrl/Cmd-P).
+  </div>
+
+  <footer>
+    Built on the <a href="https://toddlerbot.github.io/">ToddlerBot</a> platform · student pages are marked
+    <span class="pill stu">student</span>, instructor-only <span class="pill ins">instructor</span>,
+    designed for printing <span class="pill print">printable</span>.
+  </footer>
+
+</div>
+</body>
+</html>

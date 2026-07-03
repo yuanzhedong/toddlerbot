@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reward Shaping Worksheet — ToddlerBot Walk</title>
+<style>
+  :root {
+    --ink: #1f2430; --muted: #5b6472; --accent: #2f6fed; --accent-soft: #eaf1ff;
+    --line: #e2e6ee; --card: #f7f9fc; --warn-bg: #fff7e6; --warn-line: #f0c36d;
+    --good-bg: #eefaf0; --good-line: #8fd6a0;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; color: var(--ink); line-height: 1.55; }
+  .wrap { max-width: 940px; margin: 0 auto; padding: 32px 24px 80px; }
+  header.hero { background: linear-gradient(135deg, #2f6fed 0%, #6a4cf0 100%); color: #fff; padding: 36px 24px; text-align: center; }
+  header.hero h1 { margin: 0 0 6px; font-size: 1.7rem; }
+  header.hero p { margin: 0; opacity: .92; }
+  h2 { margin: 34px 0 12px; font-size: 1.35rem; border-bottom: 2px solid var(--line); padding-bottom: 6px; }
+  p { margin: 10px 0; }
+  a { color: var(--accent); }
+  code { background: #eef1f6; border-radius: 5px; padding: 2px 6px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .9em; }
+  pre { background: #1f2430; color: #e6e9f0; padding: 12px 14px; border-radius: 10px; overflow-x: auto; font-size: .85rem; }
+  pre code { background: none; color: inherit; padding: 0; }
+  table { border-collapse: collapse; width: 100%; margin: 14px 0; font-size: .92rem; }
+  th, td { text-align: left; padding: 9px 11px; border: 1px solid var(--line); vertical-align: top; }
+  th { background: var(--accent-soft); }
+  td.term { white-space: nowrap; font-weight: 600; }
+  td.w { text-align: center; color: var(--muted); }
+  .fill { background: #fffdf5; }
+  .callout { border-radius: 10px; padding: 12px 16px; margin: 16px 0; border: 1px solid var(--line); background: var(--card); }
+  .callout.warn { background: var(--warn-bg); border-color: var(--warn-line); }
+  .box { border: 1px dashed #b9c2d0; border-radius: 8px; min-height: 58px; padding: 8px 10px; background: #fffdf5; margin: 6px 0 14px; }
+  .field-label { font-weight: 600; font-size: .95rem; }
+  details { margin: 10px 0; border: 1px solid var(--good-line); background: var(--good-bg); border-radius: 8px; padding: 6px 14px; }
+  summary { cursor: pointer; font-weight: 700; color: #1c7a35; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  footer { color: var(--muted); font-size: .85rem; margin-top: 44px; border-top: 1px solid var(--line); padding-top: 16px; }
+  @media (max-width: 640px) { .grid2 { grid-template-columns: 1fr; } }
+  @media print {
+    header.hero { background: #2f6fed !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    th, details { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    details[open] summary ~ * { display: block; }
+    .box { min-height: 46px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <h1>Reward Shaping Worksheet</h1>
+  <p>ToddlerBot learns to walk — what is it actually being rewarded for?</p>
+</header>
+
+<div class="wrap">
+
+  <p><strong>Names:</strong> ______________________________  &nbsp;&nbsp; <strong>Group:</strong> __________ &nbsp;&nbsp; <strong>Date:</strong> __________</p>
+
+  <div class="callout">
+    In this repo, the robot's total reward each timestep is a <strong>sum of small terms</strong>, each with a
+    <strong>weight</strong> that says how much it matters. Below are the terms that are actually turned on in
+    <code>walk.gin</code>. A positive weight <strong>rewards</strong> a behavior; a term whose name starts with
+    <code>penalty_</code> (or is naturally negative) <strong>discourages</strong> a behavior.
+  </div>
+
+  <h2>Part 1 — Read the reward function</h2>
+  <p>For each term, fill in the two blank columns using the plain-English description as a clue.</p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Reward term</th>
+        <th>Weight</th>
+        <th>What it measures (given)</th>
+        <th class="fill">What behavior does it encourage?</th>
+        <th class="fill">What might break if you set its weight to 0?</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td class="term">lin_vel_xy</td><td class="w">2.0</td><td>How well the robot's actual forward/sideways speed matches the <em>commanded</em> walking speed.</td><td class="fill">&nbsp;</td><td class="fill">&nbsp;</td></tr>
+      <tr><td class="term">ang_vel_z</td><td class="w">1.5</td><td>How well the robot's turning rate matches the <em>commanded</em> turn.</td><td class="fill">&nbsp;</td><td class="fill">&nbsp;</td></tr>
+      <tr><td class="term">torso_quat</td><td class="w">2.5</td><td>How close the torso's orientation is to upright.</td><td class="fill">&nbsp;</td><td class="fill">&nbsp;</td></tr>
+      <tr><td class="term">feet_phase</td><td class="w">7.5</td><td>Whether each foot is at the right height at the right moment in the step cycle (lift, then plant).</td><td class="fill">&nbsp;</td><td class="fill">&nbsp;</td></tr>
+      <tr><td class="term">alive</td><td class="w">1.0</td><td>A small bonus given every timestep the robot has <em>not</em> fallen.</td><td class="fill">&nbsp;</td><td class="fill">&nbsp;</td></tr>
+      <tr><td class="term">penalty_action_rate</td><td class="w">2.0</td><td>How much the motor commands jump around from one step to the next.</td><td class="fill">&nbsp;</td><td class="fill">&nbsp;</td></tr>
+      <tr><td class="term">penalty_ang_vel_xy</td><td class="w">1.0</td><td>How much the torso is rolling/pitching (wobbling side-to-side or front-to-back).</td><td class="fill">&nbsp;</td><td class="fill">&nbsp;</td></tr>
+      <tr><td class="term">penalty_pose</td><td class="w">0.5</td><td>How far the leg joints drift from their natural default resting angles.</td><td class="fill">&nbsp;</td><td class="fill">&nbsp;</td></tr>
+      <tr><td class="term">penalty_close_feet_xy</td><td class="w">10.0</td><td>Whether the two feet cross over or get dangerously close together.</td><td class="fill">&nbsp;</td><td class="fill">&nbsp;</td></tr>
+      <tr><td class="term">penalty_feet_ori</td><td class="w">5.0</td><td>Whether the feet are tilted (on tip-toe) instead of flat on the ground.</td><td class="fill">&nbsp;</td><td class="fill">&nbsp;</td></tr>
+    </tbody>
+  </table>
+
+  <details>
+    <summary>Instructor answer key (click to reveal)</summary>
+    <ul>
+      <li><strong>lin_vel_xy</strong> — walk at the speed it's told; without it the robot has no reason to move forward at all (may just stand).</li>
+      <li><strong>ang_vel_z</strong> — turn when told; without it, turn commands are ignored.</li>
+      <li><strong>torso_quat</strong> — stay upright; without it, it may lean or topple as long as other terms are met.</li>
+      <li><strong>feet_phase</strong> — pick up its feet and take real steps; without it, it tends to shuffle/drag feet or slide.</li>
+      <li><strong>alive</strong> — survive rather than fall early; without it, less pressure to avoid ending the episode.</li>
+      <li><strong>penalty_action_rate</strong> — smooth motions; without it, jittery/twitchy commands (bad for real motors).</li>
+      <li><strong>penalty_ang_vel_xy</strong> — stop wobbling; without it, rocking/unstable gait.</li>
+      <li><strong>penalty_pose</strong> — keep a natural posture; without it, weird contorted joint angles that still "work" in sim.</li>
+      <li><strong>penalty_close_feet_xy</strong> — don't trip over its own feet; without it, feet cross and it stumbles.</li>
+      <li><strong>penalty_feet_ori</strong> — keep feet flat; without it, tip-toe walking (fragile, unrealistic).</li>
+    </ul>
+    <p><em>Key idea to draw out: agents optimize exactly what you reward, not what you meant. Remove a term and the policy will happily exploit the gap ("reward hacking").</em></p>
+  </details>
+
+  <h2>Part 2 — Make a prediction (your experiment)</h2>
+  <p>Pick <strong>one</strong> change to test. Examples: set a term's weight to <code>0</code>, double a weight, or change the target walk speed.</p>
+
+  <p class="field-label">Our change (which term / weight, or which command):</p>
+  <div class="box"></div>
+
+  <p class="field-label">Our prediction — what will the robot do differently, and why?</p>
+  <div class="box"></div>
+
+  <h2>Part 3 — Run it</h2>
+  <p>Edit the config, then launch a short classroom training run (layers the scaled-down budget on top of <code>walk.gin</code>):</p>
+  <pre><code>python toddlerbot/locomotion/train_mjx.py --env walk --gin-file "walk walk_class"</code></pre>
+  <p>To change a reward weight without editing files, you can override it on the command line, e.g. turn off the upright reward:</p>
+  <pre><code>python toddlerbot/locomotion/train_mjx.py --env walk --gin-file "walk walk_class" \
+  --gin-config "RewardScales.torso_quat = 0.0"</code></pre>
+  <div class="callout warn">
+    This is a <strong>scaled-down</strong> run (~10–15 min) — it will improve but not fully converge. Compare its
+    reward curve and video against the <strong>baseline</strong> run and the <strong>pre-trained</strong> policy.
+  </div>
+
+  <div class="grid2">
+    <div>
+      <p class="field-label">What actually happened (behavior + reward curve):</p>
+      <div class="box" style="min-height:120px;"></div>
+    </div>
+    <div>
+      <p class="field-label">Did it match your prediction? What surprised you?</p>
+      <div class="box" style="min-height:120px;"></div>
+    </div>
+  </div>
+
+  <h2>Part 4 — Reflect</h2>
+  <p class="field-label">"Reward hacking" is when an agent gets high reward in a way you didn't intend. Did your robot do anything like that? Describe it.</p>
+  <div class="box" style="min-height:80px;"></div>
+
+  <footer>
+    Companion to the ToddlerBot high-school RL curriculum. Reward terms and weights are from
+    <code>toddlerbot/locomotion/walk.gin</code>; reward logic lives in <code>walk_env.py</code>.
+  </footer>
+
+</div>
+</body>
+</html>
